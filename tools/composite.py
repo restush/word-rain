@@ -29,12 +29,30 @@ SLOTS = {
     "fix-window":   (110, 240, 235, 490),
     "whiteboard":   (598, 270, 875, 555),
     "ac":           (395, 110, 545, 265),
+    "tv":           (620, 130, 860, 265),
+    "poster-english": (115, 500, 230, 615),
+    "poster-map":   (255, 255, 395, 430),
+    "kaligrafi":    (595, 145, 695, 250),
+    "flag":         (880, 150, 965, 270),
+    "papan-karya":  (880, 300, 965, 520),
+    "curtains":     (105, 225, 240, 360),
+    "plants-new":   (85, 605, 190, 725),
+    "bookshelf-new": (240, 435, 415, 620),
+    "rugs-new":     (785, 545, 915, 675),
 }
 
 # layers drawn over the shell in this order (back to front)
 ORDER = [
     "old-window", "blackboard", "old-fan", "clock", "map",
     "bookshelf", "desks", "teacher-desk", "rugs", "plant",
+]
+
+BIG = ["wall-paint", "floor-tiles"]  # pasted unscaled at crop origin
+
+FINAL = [
+    "fix-window", "whiteboard", "ac", "poster-map", "bookshelf-new",
+    "desks", "teacher-desk", "rugs-new", "plants-new", "curtains",
+    "tv", "kaligrafi", "flag", "poster-english", "papan-karya",
 ]
 
 
@@ -66,7 +84,16 @@ def main():
     else:
         bg = sys.argv[2] if len(sys.argv) > 2 else "shell.png"
         base = Image.open(ASSETS / bg).convert("RGBA")
-        for name in ORDER:
+        names = FINAL if mode == "final" else ORDER
+        if mode == "final":
+            for name in BIG:
+                cut = ASSETS / (name + "-cut.png")
+                if cut.exists():
+                    s = Image.open(cut).convert("RGBA")
+                    bb = s.split()[3].getbbox()
+                    base.alpha_composite(s.crop(bb), (bb[0], bb[1]))
+                    print(name, "-> big paste at", (bb[0], bb[1]))
+        for name in names:
             cut = ASSETS / (name + "-cut.png")
             if not cut.exists():
                 print("skip (missing):", name)

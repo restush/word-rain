@@ -55,7 +55,7 @@ ADD-ON LAYERS (float above, position by percentage):
   papan-karya, curtains (requires fix-window), plants, prayer-rugs.
 
 LAYER SLOTS -> shop item:
-  W -> fix-window (+ curtains)     BOARD -> whiteboard      C -> clock (upgrade)
+  W -> fix-window (+ curtains)     BOARD -> whiteboard      C -> old clock (no upgrade item: TV is the clock, Restu 2026-11-13)
   F -> flag                        K -> kaligrafi (geometric only, no script)
   TV -> tv (above board)           M -> poster-map          E -> poster-english
   fan slot -> ac                   S -> bookshelf           R -> prayer-rugs

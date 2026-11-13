@@ -141,6 +141,81 @@ PROMPTS = {
         "exactly as it appears in the reference: same pot, same size, same isometric angle. "
         "Isolated on a plain pure white background. No floor, no room, nothing else. " + STYLE
     ),
+    "tv": (
+        "Using the attached classroom image ONLY as reference for size, isometric angle and "
+        "pixel-art style. Draw ONLY a modern flat-screen TV on a small wall mount bracket, "
+        "seen at the same isometric tilt as the reference blackboard (it will hang above the "
+        "blackboard). Isolated on a plain pure white background. No wall, no room, nothing "
+        "else. " + STYLE
+    ),
+    "poster-english": (
+        "Using the attached classroom image ONLY as reference for size, isometric angle and "
+        "pixel-art style. Draw ONLY a colorful classroom learning poster showing simple "
+        "pictures of everyday objects (an apple, a ball, a cat, a book) in a neat grid with a "
+        "thin border, same isometric tilt as the reference map poster. Isolated on a plain "
+        "pure white background. No wall, no room, nothing else. " + STYLE
+    ),
+    "poster-map": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a NEW crisp clean world map poster (oceans in blue, continents in "
+        "green and tan), same size and same isometric tilt as the worn map in the reference, "
+        "straight untorn edges. Isolated on a plain pure white background. No wall, no room, "
+        "nothing else. " + STYLE
+    ),
+    "kaligrafi": (
+        "Using the attached classroom image ONLY as reference for size, isometric angle and "
+        "pixel-art style. Draw ONLY a square Islamic geometric pattern wall decoration: "
+        "interlocking eight-point star and polygon tiles in teal, gold and cream, thin frame, "
+        "same wall tilt as the reference posters. Strictly NO letters, NO writing, NO script "
+        "of any kind, pure geometry only. Isolated on a plain pure white background. No wall, "
+        "no room, nothing else. " + STYLE
+    ),
+    "flag": (
+        "Using the attached classroom image ONLY as reference for size, isometric angle and "
+        "pixel-art style. Draw ONLY a small Indonesian flag (horizontal red band above white "
+        "band) mounted on a short wooden wall pole, same wall tilt as the reference posters. "
+        "Isolated on a plain pure white background. No wall, no room, nothing else. " + STYLE
+    ),
+    "papan-karya": (
+        "Using the attached classroom image ONLY as reference for size, isometric angle and "
+        "pixel-art style. Draw ONLY a wooden-framed display board with several small colorful "
+        "children's drawings pinned on it (abstract shapes, suns, houses), same wall tilt as "
+        "the reference posters. Isolated on a plain pure white background. No wall, no room, "
+        "nothing else. " + STYLE
+    ),
+    "curtains": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a pair of simple cream curtains on a slim wooden rod, sized to sit "
+        "over the top half of the reference window, same isometric tilt as the window. "
+        "Isolated on a plain pure white background. No wall, no window, no room, nothing "
+        "else. " + STYLE
+    ),
+    "clock-new": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a NEW modern round wall clock (clean white face, clear hands), "
+        "exactly the same size as the old clock in the reference. Isolated on a plain pure "
+        "white background. No wall, no room, nothing else. " + STYLE
+    ),
+    "plants-new": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a HEALTHY vibrant potted plant with lush green leaves in a "
+        "terracotta pot, exactly the same pot size as the drooping plant in the reference. "
+        "Isolated on a plain pure white background. No floor, no room, nothing else. " + STYLE
+    ),
+    "bookshelf-new": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a NEW tidy wooden bookshelf with neatly arranged colorful books and "
+        "a few items on top, exactly the same size and shape as the old bookshelf in the "
+        "reference. Isolated on a plain pure white background. No wall, no floor, no room, "
+        "nothing else. " + STYLE
+    ),
+    "rugs-new": (
+        "Using the attached classroom image ONLY as reference for exact size and isometric "
+        "angle. Draw ONLY a NEAT stack of folded prayer rugs (patterned green and red "
+        "fabrics), same overall size as the rolled rug pile in the reference corner. "
+        "Isolated on a plain pure white background. No floor, no wall, no room, nothing "
+        "else. " + STYLE
+    ),
 }
 
 
