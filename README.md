@@ -1,8 +1,8 @@
-# Temp: Word Rain (Grade 3 English)
+# Word Rain: Hujan Kata (Grade 3 English)
 
 A lightweight portrait browser game for Grade 3 English (Fase B). Vocabulary words fall down the screen and students tap the right ones. Vanilla JS, one file, no dependencies, works offline after the first load.
 
-**Play: https://restush.github.io/temp/**
+**Play: https://restush.github.io/word-rain/**
 
 ## Update the word list
 
@@ -12,8 +12,8 @@ Commit and push; GitHub Pages redeploys in about a minute.
 
 ## QR poster
 
-1. `poster.html` is the printable A4 classroom poster. Replace `{{GAME_NAME}}` before printing.
-2. Regenerate the QR code: `uv run --with qrcode python3 make_qr.py https://restush.github.io/temp/`
+1. `poster.html` is the printable A4 classroom poster. Game name is filled in (Word Rain / Hujan Kata); verify the QR url before printing.
+2. Regenerate the QR code: `uv run --with qrcode python3 make_qr.py https://restush.github.io/word-rain/`
 3. Print A4 portrait, margins none. If this repo is ever renamed, the URL changes: regenerate the QR and reprint posters.
 
 ## Structure

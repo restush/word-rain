@@ -5,7 +5,7 @@ Usage:
   python3 gen_classroom.py <name> [prompt] [ref.png ...]
 Known prompt keys use built-in prompts (extra args = reference images).
 Otherwise pass the prompt as the second argument.
-Writes project/temp/assets/<name>.png
+Writes project/word-rain/assets/<name>.png
 """
 import base64
 import json

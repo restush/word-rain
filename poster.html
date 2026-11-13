@@ -3,13 +3,13 @@
   POSTER TEMPLATE (print A4 portrait, 1 page, offline, no external resources)
 
   BEFORE PRINTING:
-  1. Replace every {{GAME_NAME}} with the final game name (keep the find-replace
+  1. Name is locked: Word Rain (Hujan Kata), slug word-rain (keep the find-replace
      simple: Edit > Find > Replace All).
   2. Generate the QR code next to this file:
      uv run --with qrcode python3 project/make_qr.py <THE GITHUB PAGES URL>
   3. Open this file in a browser, Print > A4 portrait > margins: none > 1 page.
 
-  Palette mirrors the game (project/temp.html):
+  Palette mirrors the game (project/word-rain.html):
   cream #FDF6E3 / deep teal #1A535C / coral #FF6B6B / sunny yellow #FFD166 / mint #4ECDC4.
   Contrast rules applied: text is only teal-on-cream or teal-on-yellow (>= 5.9:1);
   coral is decoration only (too light for text).
@@ -18,7 +18,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{GAME_NAME}} · Poster Kelas</title>
+<title>Word Rain · Poster Kelas</title>
 <style>
   /* System fonts only: Trebuchet MS ships with Windows + macOS, rounded and
      friendly for kids, works with zero network access. */
@@ -256,8 +256,8 @@
   <div class="tile tile-d">sun</div>
 
   <header>
-    <h1 class="game-name">{{GAME_NAME}}</h1>
-    <p class="subline">Game Bahasa Inggris Kelas 3<br>
+    <h1 class="game-name">Word Rain</h1>
+    <p class="subline">Hujan Kata · Game Bahasa Inggris Kelas 3<br>
       <span class="en">Grade 3 English Game</span></p>
   </header>
 
