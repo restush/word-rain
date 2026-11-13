@@ -2,17 +2,460 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Temp — Grade 3 English Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temp: Word Rain (Grade 3 English)</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #fdf6e3; font-family: sans-serif; }
-  #app { display: flex; align-items: center; justify-content: center; height: 100%; }
+:root{--cream:#FDF6E3;--teal:#1A535C;--sun:#FFD166;--coral:#FF6B6B;--mint:#4ECDC4}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--cream);color:var(--teal);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;cursor:pointer}
+#app{width:100%;max-width:480px;height:100dvh;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);text-align:center}
+.hidden{display:none}
+h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
+.tagline{font-size:16px;font-weight:bold;background:var(--sun);color:var(--teal);padding:6px 14px;border-radius:10px;border:2px solid var(--teal)}
+.packs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pack-btn{background:#fff;color:var(--teal);border:3px solid var(--teal);border-radius:14px;padding:12px 14px;font-size:15px;font-weight:bold;min-height:48px}
+.pack-btn[aria-pressed="true"]{background:var(--sun)}
+.btn{background:var(--teal);color:var(--cream);border:0;border-radius:16px;padding:16px 30px;font-size:20px;font-weight:bold;min-height:56px;min-width:210px;box-shadow:0 4px 0 #0d2a30}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #0d2a30}
+.btn.alt{background:#fff;color:var(--teal);border:3px solid var(--teal);box-shadow:0 4px 0 var(--teal)}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.hint{font-size:14px;line-height:1.5;max-width:310px}
+.credit{font-size:12px;opacity:.75}
+#screen-game{justify-content:flex-start;gap:10px;padding:14px}
+#topbar{display:flex;gap:8px;width:100%}
+.pill{flex:1;background:#fff;border:3px solid var(--teal);border-radius:12px;padding:6px 4px;font-size:12px;font-weight:bold;display:flex;flex-direction:column;gap:1px}
+.pill b{font-size:19px}
+#prompt{width:100%;background:var(--sun);border:3px solid var(--teal);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;text-align:left}
+#prompt-text{flex:1;font-size:18px;font-weight:bold;line-height:1.3}
+#prompt-sub{display:block;font-size:13px;font-weight:normal}
+#speak-btn{width:46px;height:46px;min-width:46px;border-radius:50%;background:var(--teal);color:var(--cream);border:0;font-size:20px}
+#timerbar{width:100%;height:10px;background:#fff;border:2px solid var(--teal);border-radius:8px;overflow:hidden}
+#timerbar i{display:block;height:100%;width:100%;background:var(--teal);border-radius:6px}
+#sky{position:relative;flex:1;width:100%;overflow:hidden;border:3px solid var(--teal);border-radius:18px;background:linear-gradient(180deg,#DFF3F1,var(--cream))}
+.card{position:absolute;top:0;left:0;width:92px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:8px 5px;touch-action:manipulation;will-change:transform}
+.card .pic{font-size:30px;line-height:1}
+.card .sw{width:30px;height:30px;border-radius:8px;border:2px solid var(--teal)}
+.card .word{font-size:15px;font-weight:bold}
+@keyframes pop{40%{transform:scale(1.15)}100%{opacity:0}}
+.pop{animation:pop .32s ease-out forwards;pointer-events:none}
+@keyframes shake{20%{margin-left:-6px}40%{margin-left:6px}60%{margin-left:-4px}80%{margin-left:4px}}
+.shake{animation:shake .3s}
+@keyframes floatup{to{transform:translateY(-46px);opacity:0}}
+.float{position:absolute;font-size:20px;font-weight:bold;color:var(--teal);background:var(--sun);border:2px solid var(--teal);border-radius:10px;padding:2px 10px;animation:floatup .8s ease-out forwards;pointer-events:none;z-index:4}
+#flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;background:rgba(253,246,227,.92);z-index:5;text-align:center;padding:20px;line-height:1.4}
+#result-score{font-size:clamp(52px,17vw,76px);line-height:1}
+.stars{font-size:42px;letter-spacing:8px;color:var(--teal)}
+.ayat{background:#fff;border:3px solid var(--teal);border-radius:16px;padding:14px 16px;max-width:330px;line-height:1.5}
+.ayat b{font-size:19px}
+.ayat span{display:block;font-size:13px;margin-top:6px}
+#rotate{position:fixed;inset:0;background:var(--cream);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px}
+@media (orientation:landscape) and (max-height:520px){#rotate{display:flex}}
 </style>
 </head>
 <body>
-<div id="app"><h1>TEMP</h1></div>
+<div id="rotate"><h1>Temp</h1><p class="tagline">Putar HP ke mode portrait, ya!</p><p class="hint">Please rotate your phone to portrait.</p></div>
+<div id="app">
+
+  <div id="screen-title" class="screen">
+    <h1>TEMP</h1>
+    <p class="tagline">Word Rain: game Bahasa Inggris Kelas 3</p>
+    <div class="packs" id="packs" role="group" aria-label="Pilih tema">
+      <button class="pack-btn" data-pack="animals" aria-pressed="false">Animals</button>
+      <button class="pack-btn" data-pack="colors" aria-pressed="false">Colors</button>
+      <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
+    </div>
+    <button class="btn" id="start-btn">MULAI MAIN</button>
+    <p class="hint">Ketuk kata yang tepat saat jatuh dari atas.<br>Tap the right words as they fall!</p>
+    <p class="credit">SDIT Baitussalam 2 Cangkringan</p>
+  </div>
+
+  <div id="screen-game" class="screen hidden">
+    <div id="topbar">
+      <div class="pill">SKOR<b id="score-val">0</b></div>
+      <div class="pill">ROUND<b id="round-val">1/5</b></div>
+      <div class="pill">STREAK<b id="streak-val">0</b></div>
+    </div>
+    <div id="prompt">
+      <div id="prompt-text" aria-live="polite">Tap: cat</div>
+      <button id="speak-btn" aria-label="Dengarkan kata" title="Dengarkan kata">&#128266;</button>
+    </div>
+    <div id="timerbar"><i id="timer-fill"></i></div>
+    <div id="sky"></div>
+  </div>
+
+  <div id="screen-result" class="screen hidden">
+    <p class="tagline" id="result-label">Alhamdulillah, selesai!</p>
+    <div class="stars" id="stars">&#9733;&#9733;&#9733;</div>
+    <div id="result-score">0</div>
+    <p class="hint">Skor kamu. Best streak: <b id="best-streak">0</b></p>
+    <div class="ayat"><b>&#1585;&#1614;&#1576;&#1617;&#1616; &#1586;&#1616;&#1583;&#1606;&#1616;&#1610; &#1593;&#1616;&#1604;&#1605;&#164B;&#1575;</b><span>"Rabbii zidnii 'ilmaa" (QS. Thaahaa: 114)<br>Ya Tuhan kami, tambahkanlah ilmu kepada kami.</span></div>
+    <button class="btn" id="retry-btn">MAIN LAGI</button>
+    <button class="btn alt" id="menu-btn">GANTI TEMA</button>
+  </div>
+
+</div>
 <script>
-  // Game shell goes here (vanilla JS, content-driven).
+"use strict";
+/* ============================================================
+   CONTENT TABLE: guru edit bagian ini saja (teachers edit here).
+   en = English word, id = bahasa Indonesia, pic = emoji atau #warna, tag = animal|color
+   ============================================================ */
+const CONTENT = {
+  animals: [
+    {en:"cat",id:"kucing",pic:"\uD83D\uDC31",tag:"animal"},
+    {en:"dog",id:"anjing",pic:"\uD83D\uDC36",tag:"animal"},
+    {en:"bird",id:"burung",pic:"\uD83D\uDC26",tag:"animal"},
+    {en:"fish",id:"ikan",pic:"\uD83D\uDC1F",tag:"animal"},
+    {en:"rabbit",id:"kelinci",pic:"\uD83D\uDC30",tag:"animal"},
+    {en:"monkey",id:"monyet",pic:"\uD83D\uDC12",tag:"animal"},
+    {en:"elephant",id:"gajah",pic:"\uD83D\uDC18",tag:"animal"},
+    {en:"tiger",id:"macan",pic:"\uD83D\uDC2F",tag:"animal"},
+    {en:"cow",id:"sapi",pic:"\uD83D\uDC2E",tag:"animal"},
+    {en:"duck",id:"bebek",pic:"\uD83E\uDD86",tag:"animal"},
+    {en:"horse",id:"kuda",pic:"\uD83D\uDC34",tag:"animal"},
+    {en:"goat",id:"kambing",pic:"\uD83D\uDC10",tag:"animal"}
+  ],
+  colors: [
+    {en:"red",id:"merah",pic:"#E63946",tag:"color"},
+    {en:"blue",id:"biru",pic:"#2B6CB0",tag:"color"},
+    {en:"green",id:"hijau",pic:"#2F9E44",tag:"color"},
+    {en:"yellow",id:"kuning",pic:"#F4C430",tag:"color"},
+    {en:"orange",id:"oranye",pic:"#E8590C",tag:"color"},
+    {en:"purple",id:"ungu",pic:"#7048E8",tag:"color"},
+    {en:"black",id:"hitam",pic:"#212529",tag:"color"},
+    {en:"white",id:"putih",pic:"#FFFFFF",tag:"color"},
+    {en:"brown",id:"cokelat",pic:"#8B5A2B",tag:"color"},
+    {en:"pink",id:"pink",pic:"#F06595",tag:"color"}
+  ]
+};
+const CATEGORY_WORDS = {animal:"animal",color:"color"};
+const CATEGORY_ID = {animal:"hewan",color:"warna"};
+/* --- engine --- */
+
+
+/* --- engine: teachers do not edit below --- */
+const $ = (id) => document.getElementById(id);
+const screens = {title: $("screen-title"), game: $("screen-game"), result: $("screen-result")};
+const sky = $("sky");
+const fmt = (pic) => pic.charAt(0) === "#"
+  ? '<span class="sw" style="background:' + pic + '"></span>'
+  : '<span class="pic">' + pic + "</span>";
+
+const state = {
+  pack: "mixed",
+  running: false,
+  round: 0,
+  totalRounds: 5,
+  roundType: "word",
+  target: null,
+  targetTag: null,
+  need: 0,
+  hits: 0,
+  totalHits: 0,
+  totalNeed: 0,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  timeLeft: 0,
+  roundTime: 35,
+  spawnTimer: 0,
+  items: [],
+  lastT: 0
+};
+
+function pool() {
+  const tags = state.pack === "mixed"
+    ? ["animal", "color"]
+    : [state.pack === "animals" ? "animal" : "color"];
+  return CONTENT.animals.concat(CONTENT.colors).filter((w) => tags.indexOf(w.tag) >= 0);
+}
+
+function show(name) {
+  screens.title.classList.add("hidden");
+  screens.game.classList.add("hidden");
+  screens.result.classList.add("hidden");
+  screens[name].classList.remove("hidden");
+}
+
+/* Web Audio: sounds are generated, zero asset bytes */
+let AC = null;
+function audio() {
+  if (!AC) {
+    try { AC = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+function tone(freq, dur, type, vol, slide) {
+  const c = audio();
+  if (!c) return;
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, c.currentTime);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, c.currentTime + dur);
+  g.gain.setValueAtTime(vol, c.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+  o.connect(g);
+  g.connect(c.destination);
+  o.start();
+  o.stop(c.currentTime + dur);
+}
+const sfx = {
+  pop: () => tone(660, 0.12, "sine", 0.25, 990),
+  buzz: () => tone(180, 0.18, "square", 0.12),
+  chime: () => {
+    tone(523, 0.18, "triangle", 0.2);
+    setTimeout(() => tone(659, 0.18, "triangle", 0.2), 120);
+    setTimeout(() => tone(784, 0.25, "triangle", 0.2), 240);
+  },
+  start: () => {
+    tone(392, 0.15, "triangle", 0.2);
+    setTimeout(() => tone(523, 0.2, "triangle", 0.2), 130);
+  }
+};
+
+/* Optional pronunciation via the phone's own voice */
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+if (!("speechSynthesis" in window)) $("speak-btn").style.display = "none";
+
+function updateHud() {
+  $("score-val").textContent = state.score;
+  $("round-val").textContent = state.round + "/" + state.totalRounds;
+  $("streak-val").textContent = state.streak;
+}
+
+function flash(text, ms) {
+  const old = sky.querySelector(".flash");
+  if (old) old.remove();
+  const f = document.createElement("div");
+  f.className = "flash";
+  f.id = "flash";
+  f.textContent = text;
+  sky.appendChild(f);
+  setTimeout(() => f.remove(), ms);
+}
+
+function floatText(text, x, y) {
+  const f = document.createElement("div");
+  f.className = "float";
+  f.textContent = text;
+  f.style.left = Math.max(4, x - 20) + "px";
+  f.style.top = Math.max(4, y - 30) + "px";
+  sky.appendChild(f);
+  setTimeout(() => f.remove(), 850);
+}
+
+function clearItems() {
+  state.items.forEach((it) => it.el.remove());
+  state.items = [];
+}
+
+function spawnItem() {
+  const list = pool();
+  let data;
+  if (state.roundType === "word" && Math.random() < 0.42) {
+    data = state.target;
+  } else {
+    data = list[Math.floor(Math.random() * list.length)];
+  }
+  const el = document.createElement("button");
+  el.className = "card";
+  el.type = "button";
+  el.innerHTML = state.roundType === "word"
+    ? '<span class="word">' + data.en + "</span>"
+    : fmt(data.pic) + '<span class="word">' + data.en + "</span>";
+  el.setAttribute("aria-label", data.en);
+  const maxX = sky.clientWidth - 106;
+  const x = 6 + Math.random() * Math.max(6, maxX);
+  const item = {
+    el: el,
+    data: data,
+    x: x,
+    y: -110,
+    speed: 55 + Math.random() * 35 + state.round * 8,
+    dead: false
+  };
+  el.style.transform = "translate(" + x + "px, -110px)";
+  el.addEventListener("pointerdown", (e) => { e.preventDefault(); tapItem(item); });
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tapItem(item); }
+  });
+  sky.appendChild(el);
+  state.items.push(item);
+}
+
+function tapItem(item) {
+  if (!state.running || item.dead) return;
+  const ok = state.roundType === "word"
+    ? item.data.en === state.target.en
+    : item.data.tag === state.targetTag;
+  if (ok) {
+    item.dead = true;
+    state.hits++;
+    state.totalHits++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    state.score += 10;
+    sfx.pop();
+    item.el.classList.add("pop");
+    floatText("+10", item.x, item.y);
+    if (state.streak === 3) floatText("Great!", item.x, item.y);
+    if (state.streak === 5) floatText("Amazing!", item.x, item.y);
+    if (state.streak === 8) floatText("MasyaAllah!", item.x, item.y);
+    setTimeout(() => item.el.remove(), 340);
+    updateHud();
+    if (state.hits >= state.need) endRound();
+  } else {
+    state.streak = 0;
+    sfx.buzz();
+    item.el.classList.remove("shake");
+    void item.el.offsetWidth;
+    item.el.classList.add("shake");
+    updateHud();
+  }
+}
+
+function startRound() {
+  state.round++;
+  $("round-val").textContent = state.round + "/" + state.totalRounds;
+  clearItems();
+  const tags = state.pack === "mixed"
+    ? ["animal", "color"]
+    : [state.pack === "animals" ? "animal" : "color"];
+  if (state.round % 2 === 0 && tags.length > 1) {
+    state.roundType = "category";
+    state.targetTag = tags[Math.floor(Math.random() * tags.length)];
+    state.need = 8;
+    $("prompt-text").innerHTML =
+      "Tap every " + CATEGORY_WORDS[state.targetTag] + "!" +
+      '<span id="prompt-sub">Ketuk semua ' + CATEGORY_ID[state.targetTag] + "!</span>";
+    speak("Tap every " + CATEGORY_WORDS[state.targetTag]);
+  } else {
+    state.roundType = "word";
+    const list = pool();
+    state.target = list[Math.floor(Math.random() * list.length)];
+    state.need = 4;
+    $("prompt-text").innerHTML =
+      fmt(state.target.pic) +
+      '<span id="prompt-sub">Ketuk kata: ' + state.target.id + " (tap the English word)</span>";
+    speak(state.target.en);
+  }
+  state.hits = 0;
+  state.totalNeed += state.need;
+  state.timeLeft = state.roundTime;
+  state.spawnTimer = 0;
+  state.running = true;
+  flash("Round " + state.round, 600);
+  updateHud();
+}
+
+function endRound() {
+  if (!state.running) return;
+  state.running = false;
+  clearItems();
+  sfx.chime();
+  flash(state.hits >= state.need ? "Bagus!" : "Waktu habis!", 900);
+  setTimeout(() => {
+    if (state.round >= state.totalRounds) endGame();
+    else startRound();
+  }, 1000);
+}
+
+function endGame() {
+  const ratio = state.totalNeed > 0 ? state.totalHits / state.totalNeed : 0;
+  const stars = ratio >= 0.85 ? 3 : ratio >= 0.55 ? 2 : 1;
+  $("stars").innerHTML = "\u2605".repeat(stars) + "\u2606".repeat(3 - stars);
+  $("result-score").textContent = state.score;
+  $("best-streak").textContent = state.bestStreak;
+  $("result-label").textContent = state.score > 0
+    ? "Alhamdulillah, selesai!"
+    : "Coba lagi, ya!";
+  show("result");
+  sfx.chime();
+}
+
+function startGame() {
+  audio();
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.round = 0;
+  state.totalNeed = 0;
+  state.totalHits = 0;
+  state.hits = 0;
+  show("game");
+  sfx.start();
+  startRound();
+}
+
+function loop(t) {
+  if (!state.lastT) state.lastT = t;
+  const dt = Math.min(50, t - state.lastT) / 1000;
+  state.lastT = t;
+  if (state.running) {
+    state.timeLeft -= dt;
+    $("timer-fill").style.width =
+      Math.max(0, (state.timeLeft / state.roundTime) * 100) + "%";
+    if (state.timeLeft <= 0) {
+      endRound();
+    } else {
+      state.spawnTimer -= dt;
+      if (state.spawnTimer <= 0 && state.items.length < 6) {
+        spawnItem();
+        state.spawnTimer = 0.9 - Math.min(0.35, state.round * 0.06);
+      }
+      const h = sky.clientHeight;
+      for (const item of state.items) {
+        if (item.dead) continue;
+        item.y += item.speed * dt;
+        item.el.style.transform =
+          "translate(" + item.x + "px, " + item.y + "px)";
+        if (item.y > h + 20) {
+          item.dead = true;
+          item.el.remove();
+        }
+      }
+      state.items = state.items.filter((it) => !it.dead);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+$("start-btn").addEventListener("click", startGame);
+$("retry-btn").addEventListener("click", startGame);
+$("menu-btn").addEventListener("click", () => {
+  clearItems();
+  show("title");
+});
+$("speak-btn").addEventListener("click", () => {
+  if (state.roundType === "word" && state.target) speak(state.target.en);
+  else if (state.targetTag) speak("Tap every " + CATEGORY_WORDS[state.targetTag]);
+});
+Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"), (btn) => {
+  btn.addEventListener("click", () => {
+    Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"),
+      (b) => b.setAttribute("aria-pressed", String(b === btn)));
+    state.pack = btn.getAttribute("data-pack");
+    sfx.pop();
+  });
+});
+
+updateHud();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
