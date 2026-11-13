@@ -46,17 +46,22 @@
   <h2>Selected layer</h2>
   <div class="row"><label>X</label><input type="number" id="px"><label>Y</label><input type="number" id="py"></div>
   <div class="row"><label>Width</label><input type="number" id="pw"></div>
-  <div class="row"><label>Rotate</label><input type="range" id="prot" min="-25" max="25" step="0.5" value="0"><span id="protv">0</span></div>
-  <div class="row"><label>Skew X</label><input type="range" id="pskx" min="-40" max="40" step="0.5" value="0"><span id="pskxv">0</span></div>
-  <div class="row"><label>Skew Y</label><input type="range" id="psky" min="-40" max="40" step="0.5" value="0"><span id="pskyv">0</span></div>
-  <div class="row"><label>Scale X</label><input type="range" id="pscx" min="0.3" max="2.5" step="0.01" value="1"><span id="pscxv">1</span></div>
-  <div class="row"><label>Scale Y</label><input type="range" id="pscy" min="0.3" max="2.5" step="0.01" value="1"><span id="pscyv">1</span></div>
+  <div class="row"><label>Rotate</label><input type="range" id="prot" min="-25" max="25" step="0.5" value="0"><input type="number" id="protv" step="0.5" value="0"></div>
+  <div class="row"><label>Skew X</label><input type="range" id="pskx" min="-40" max="40" step="0.5" value="0"><input type="number" id="pskxv" step="0.5" value="0"></div>
+  <div class="row"><label>Skew Y</label><input type="range" id="psky" min="-40" max="40" step="0.5" value="0"><input type="number" id="pskyv" step="0.5" value="0"></div>
+  <div class="row"><label>Scale X</label><input type="range" id="pscx" min="0.3" max="2.5" step="0.01" value="1"><input type="number" id="pscxv" step="0.01" value="1"></div>
+  <div class="row"><label>Scale Y</label><input type="range" id="pscy" min="0.3" max="2.5" step="0.01" value="1"><input type="number" id="pscyv" step="0.01" value="1"></div>
   <div class="row">
     <button class="alt" id="flip">Flip</button>
     <button class="alt" id="zup">Z up</button>
     <button class="alt" id="zdown">Z down</button>
   </div>
-  <h2>Layers (top = front)</h2>
+  <div class="row">
+    <button class="alt" id="vbefore">View BEFORE</button>
+    <button class="alt" id="vafter">View AFTER</button>
+    <button class="alt" id="vall">View ALL</button>
+  </div>
+  <h2>Layers (grouped, top = front)</h2>
   <div id="list"></div>
   <h2>Output for the assistant</h2>
   <textarea id="out" readonly></textarea>
@@ -69,15 +74,16 @@
 <script>
 const ASSET = "../assets/";
 const INIT = [
-  ["wall-paint",35,40,954],["floor-tiles",66,453,892],
-  ["old-window",110,240,125],["blackboard",598,270,277],["old-fan",415,135,100],
-  ["clock",705,150,60],["map",255,255,140],["bookshelf",240,435,175],
-  ["desks",255,525,490],["teacher-desk",580,500,175],["rugs",785,545,130],["plant",85,605,105],
-  ["fix-window",110,240,125],["whiteboard",598,270,277],["ac",395,110,150],
-  ["poster-map",255,255,140],["bookshelf-new",240,435,175],["rugs-new",785,545,130],
-  ["plants-new",85,605,105],["curtains",105,225,135],
-  ["tv",620,130,240],["kaligrafi",595,145,100],["flag",880,150,85],
-  ["poster-english",115,500,115],["papan-karya",880,300,85]
+  ["wall-paint",35,40,954,"after"],["floor-tiles",66,453,892,"after"],
+  ["old-window",110,240,125,"before"],["blackboard",598,270,277,"before"],["old-fan",415,135,100,"before"],
+  ["clock",705,150,60,"before"],["map",255,255,140,"before"],["bookshelf",240,435,175,"before"],
+  ["desks",255,525,490,"both"],["teacher-desk",580,500,175,"both"],
+  ["rugs",785,545,130,"before"],["plant",85,605,105,"before"],
+  ["fix-window",110,240,125,"after"],["whiteboard",598,270,277,"after"],["ac",395,110,150,"after"],
+  ["poster-map",255,255,140,"after"],["bookshelf-new",240,435,175,"after"],["rugs-new",785,545,130,"after"],
+  ["plants-new",85,605,105,"after"],["curtains",105,225,135,"after"],
+  ["tv",620,130,240,"after"],["kaligrafi",595,145,100,"after"],["flag",880,150,85,"after"],
+  ["poster-english",115,500,115,"after"],["papan-karya",880,300,85,"after"]
 ];
 function $(id){ return document.getElementById(id); }
 const stage = document.getElementById("stage");
@@ -101,18 +107,18 @@ function reorder(){ layers.forEach((st) => stage.appendChild(st.el)); }
 function sync(){
   if (sel){
     $("px").value = sel.x; $("py").value = sel.y; $("pw").value = sel.w;
-    $("prot").value = sel.rot; $("protv").textContent = sel.rot;
+    $("prot").value = sel.rot; $("protv").value = sel.rot;
     $("coords").textContent = sel.name + "   x:" + sel.x + "  y:" + sel.y +
       "  w:" + sel.w + "  rot:" + sel.rot + "  skew:" + sel.skx + "/" + sel.sky +
       "  scale:" + sel.scx + "/" + sel.scy + (sel.flip ? "  flipped" : "");
-    $("pskx").value = sel.skx; $("pskxv").textContent = sel.skx;
-    $("psky").value = sel.sky; $("pskyv").textContent = sel.sky;
-    $("pscx").value = sel.scx; $("pscxv").textContent = sel.scx;
-    $("pscy").value = sel.scy; $("pscyv").textContent = sel.scy;
+    $("pskx").value = sel.skx; $("pskxv").value = sel.skx;
+    $("psky").value = sel.sky; $("pskyv").value = sel.sky;
+    $("pscx").value = sel.scx; $("pscxv").value = sel.scx;
+    $("pscy").value = sel.scy; $("pscyv").value = sel.scy;
   }
   const out = {};
   layers.forEach((st) => {
-    out[st.name] = {x: st.x, y: st.y, w: st.w, rot: st.rot, skx: st.skx, sky: st.sky,
+    out[st.name] = {group: st.group, x: st.x, y: st.y, w: st.w, rot: st.rot, skx: st.skx, sky: st.sky,
       scx: st.scx, scy: st.scy, flip: st.flip, visible: st.visible};
   });
   $("out").value = JSON.stringify(out, null, 1);
@@ -120,30 +126,48 @@ function sync(){
 function select(st){
   sel = st;
   layers.forEach((s) => s.el.classList.toggle("sel", s === sel));
-  Array.prototype.forEach.call(document.querySelectorAll(".lay"), (r, i) =>
-    r.classList.toggle("sel", layers[layers.length - 1 - i] === sel));
+  Array.prototype.forEach.call(document.querySelectorAll(".lay"), (r) =>
+    r.classList.toggle("sel", r._st === sel));
   sync();
 }
 function buildList(){
   const list = $("list");
   list.innerHTML = "";
-  layers.slice().reverse().forEach((st) => {
-    const row = document.createElement("div");
-    row.className = "lay";
-    const cb = document.createElement("input");
-    cb.type = "checkbox"; cb.checked = st.visible;
-    cb.addEventListener("change", () => { st.visible = cb.checked; place(st); sync(); });
-    const nm = document.createElement("span");
-    nm.className = "nm"; nm.textContent = st.name;
-    const up = document.createElement("button");
-    up.textContent = "+"; up.title = "bring forward";
-    up.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, 1); });
-    const dn = document.createElement("button");
-    dn.textContent = "-"; dn.title = "send backward";
-    dn.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, -1); });
-    row.append(cb, nm, up, dn);
-    row.addEventListener("click", () => select(st));
-    list.appendChild(row);
+  [["before","BEFORE (kondisi awal)"],["both","SHARED (selalu tampil)"],["after","AFTER (renovasi)"]].forEach((g) => {
+    const members = layers.filter((s) => s.group === g[0]);
+    const head = document.createElement("div");
+    head.className = "lay";
+    head.style.fontWeight = "bold";
+    const hcb = document.createElement("input");
+    hcb.type = "checkbox";
+    hcb.checked = members.every((s) => s.visible);
+    hcb.addEventListener("change", () => {
+      members.forEach((s) => { s.visible = hcb.checked; place(s); });
+      buildList(); sync();
+    });
+    const hnm = document.createElement("span");
+    hnm.className = "nm"; hnm.textContent = g[1];
+    head.append(hcb, hnm);
+    list.appendChild(head);
+    members.slice().reverse().forEach((st) => {
+      const row = document.createElement("div");
+      row.className = "lay";
+      row._st = st;
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = st.visible;
+      cb.addEventListener("change", () => { st.visible = cb.checked; place(st); sync(); });
+      const nm = document.createElement("span");
+      nm.className = "nm"; nm.textContent = st.name;
+      const up = document.createElement("button");
+      up.textContent = "+"; up.title = "bring forward";
+      up.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, 1); });
+      const dn = document.createElement("button");
+      dn.textContent = "-"; dn.title = "send backward";
+      dn.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, -1); });
+      row.append(cb, nm, up, dn);
+      row.addEventListener("click", () => select(st));
+      list.appendChild(row);
+    });
   });
 }
 function moveZ(st, dir){
@@ -183,7 +207,7 @@ function init(){
     const img = document.createElement("img");
     img.className = "layer";
     img.src = ASSET + name + "-cut.png";
-    const st = {name: name, x: row[1], y: row[2], w: row[3], rot: 0, skx: 0, sky: 0,
+    const st = {name: name, group: row[4], x: row[1], y: row[2], w: row[3], rot: 0, skx: 0, sky: 0,
       scx: 1, scy: 1, flip: false, visible: true, el: img};
     img.addEventListener("pointerdown", (e) => startDrag(e, st));
     stage.appendChild(img);
@@ -204,23 +228,40 @@ $("zoom").addEventListener("input", applyZoom);
 }));
 $("prot").addEventListener("input", () => {
   if (!sel) return;
-  sel.rot = parseFloat($("prot").value);
+  sel.rot = parseFloat($("prot").value) || 0;
   place(sel); sync();
 });
-["pskx", "psky", "pscx", "pscy"].forEach((id) => $(id).addEventListener("input", () => {
-  if (!sel) return;
-  sel.skx = parseFloat($("pskx").value);
-  sel.sky = parseFloat($("psky").value);
-  sel.scx = parseFloat($("pscx").value);
-  sel.scy = parseFloat($("pscy").value);
-  place(sel); sync();
-}));
+[["prot","rot"],["pskx","skx"],["psky","sky"],["pscx","scx"],["pscy","scy"]].forEach((p) => {
+  const sl = $(p[0]), nm = $(p[0] + "v");
+  sl.addEventListener("input", () => {
+    if (!sel) return;
+    sel[p[1]] = parseFloat(sl.value) || 0;
+    nm.value = sel[p[1]];
+    place(sel); sync();
+  });
+  nm.addEventListener("change", () => {
+    if (!sel) return;
+    sel[p[1]] = parseFloat(nm.value) || 0;
+    sl.value = sel[p[1]];
+    place(sel); sync();
+  });
+});
 $("flip").addEventListener("click", () => {
   if (!sel) return;
   sel.flip = !sel.flip; place(sel); sync();
 });
 $("zup").addEventListener("click", () => { if (sel) moveZ(sel, 1); });
 $("zdown").addEventListener("click", () => { if (sel) moveZ(sel, -1); });
+function setView(before, after){
+  layers.forEach((st) => {
+    st.visible = st.group === "both" ? true : (st.group === "before" ? before : after);
+    place(st);
+  });
+  buildList(); sync();
+}
+$("vbefore").addEventListener("click", () => setView(true, false));
+$("vafter").addEventListener("click", () => setView(false, true));
+$("vall").addEventListener("click", () => setView(true, true));
 $("copy").addEventListener("click", () => {
   const t = $("out");
   t.select();
