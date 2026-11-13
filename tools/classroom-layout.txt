@@ -1,0 +1,53 @@
+CLASSROOM LAYOUT SPEC (1:1 square, isometric room box, open top)
+
+Reference: Habbo-style dollhouse classroom (Restu, 2026-11-13). Two back walls meet
+at a vertical corner (center back); floor is a diamond below. NO light fixture exists
+(Restu: vertical light removed entirely). The dim wall fan stays in the base and is
+REPLACED by the ac purchase. TV sits ABOVE the blackboard.
+
+              ·  ·  ·  ·  ·  ·
+           ╱  M  [W] [W]  A?  ╲         W2 LEFT WALL
+          ╱  fan(old->ac)      ╲
+         ╱_______________________╲
+         ╲  ·  ·  ·  ·  ·  ·  · ╱
+          ╲  ·  ·  · t ·  ·  · ╱
+           ╲  ·  D  ·  ·  D  · ╱
+            ╲  ·  ·  ·  ·  ·  ·╱
+             ╲  ·  D  ·  ·  D ╱
+              ╲  ·  S  ·  ·  p╱
+               ╲  ·  ·  R  · ╱
+                ╲  ·  ·  ·  ·╱
+                 ╲  ·  ·  · ╱
+                  ╲  ·  ·  ╱
+                   ╲____╱
+
+   W1 RIGHT WALL (top-right strip):
+     [TV] ABOVE the board   F flag   K kaligrafi   [BOARD] (2 slots wide)   C clock
+
+   W2 LEFT WALL (top-left strip):
+     M map poster   [W] windows x2 (one broken)   fan (old, dim; ac replaces it)
+
+   FLOOR (diamond):
+     t teacher desk (near blackboard)
+     D student desks x4+ facing the blackboard (rows)
+     S bookshelf (along left wall)
+     R prayer rugs (corner)
+     p plants (front corner)
+
+Z-ORDER: wall-paint + floor-tiles render UNDER everything.
+REPLACEMENT LAYERS (geometry must match base.png exactly, generate with base as ref):
+  fix-window -> W slots, whiteboard -> BOARD slots, ac -> old fan slot,
+  floor-tiles -> floor, wall-paint -> wall strips, clock -> clock slot.
+ADD-ON LAYERS (float above, position by percentage):
+  tv (ABOVE board), bookshelf, poster-english, poster-map, kaligrafi, flag,
+  papan-karya, curtains (requires fix-window), plants, prayer-rugs.
+
+LAYER SLOTS -> shop item:
+  W -> fix-window (+ curtains)     BOARD -> whiteboard      C -> clock (upgrade)
+  F -> flag                        K -> kaligrafi (geometric only, no script)
+  TV -> tv (above board)           M -> poster-map          E -> poster-english
+  fan slot -> ac                   S -> bookshelf           R -> prayer-rugs
+  p -> plants                      floor -> floor-tiles     walls -> wall-paint
+  free wall area near E -> papan-karya (optional)
+
+REMOVED (never generate): ceiling-light / any fluorescent or vertical light fixture.
