@@ -104,8 +104,10 @@ PROMPTS = {
     "map": (
         "Using the attached classroom image ONLY as reference for exact position, size, "
         "isometric angle and pixel-art style. Draw ONLY the worn world map poster exactly as "
-        "it appears in the reference: slightly torn corners, same isometric tilt. Isolated on "
-        "a plain pure white background. No wall, no room, nothing else. " + STYLE
+        "it appears in the reference: LARGE square-ish poster, about as tall as it is wide "
+        "(or slightly taller), the same prominent size as the reference map, slightly torn "
+        "corners, same isometric tilt. Isolated on a plain pure white background. No wall, no "
+        "room, nothing else. " + STYLE
     ),
     "bookshelf": (
         "Using the attached classroom image ONLY as reference for exact position, size, "
