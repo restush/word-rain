@@ -143,10 +143,10 @@ PROMPTS = {
     ),
     "tv": (
         "Using the attached classroom image ONLY as reference for size, isometric angle and "
-        "pixel-art style. Draw ONLY a modern flat-screen TV on a small wall mount bracket, "
-        "seen at the same isometric tilt as the reference blackboard (it will hang above the "
-        "blackboard). Isolated on a plain pure white background. No wall, no room, nothing "
-        "else. " + STYLE
+        "pixel-art style. Draw ONLY a modern flat-screen TV as a bare flat panel with a slim "
+        "bezel: NO wall mount, NO VESA bracket, NO arm, NO stand, nothing behind it and "
+        "nothing below it, seen at the same isometric tilt as the reference blackboard. "
+        "Isolated on a plain pure white background. No wall, no room, nothing else. " + STYLE
     ),
     "poster-english": (
         "Using the attached classroom image ONLY as reference for size, isometric angle and "
