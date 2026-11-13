@@ -78,6 +78,18 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .card-inner.buff{background:var(--sun)}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
+#screen-class{justify-content:flex-start;gap:8px;padding:12px}
+#class-top{display:flex;align-items:center;gap:8px;width:100%}
+#class-stage-wrap{width:100%;max-width:600px;aspect-ratio:1;position:relative;flex:0 0 auto}
+#class-stage{position:absolute;top:0;left:0;width:1024px;height:1024px;transform-origin:top left}
+#class-stage img{position:absolute;user-select:none;-webkit-user-drag:none}
+#shop{display:flex;gap:8px;overflow-x:auto;width:100%;padding:4px 2px 10px}
+.shop-item{flex:0 0 108px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:6px;text-align:center;font-size:12px}
+.shop-item img{width:66px;height:66px;object-fit:contain}
+.shop-item .nm{font-weight:bold;display:block;min-height:30px}
+.shop-item button{width:100%;margin-top:4px;padding:9px 4px;font-size:13px;border-radius:10px}
+.shop-item button[disabled]{opacity:.6}
+#class-flash{position:absolute;inset:auto 0 40% 0;text-align:center;font-size:22px;font-weight:bold;color:var(--teal);pointer-events:none}
 #result-score{font-size:clamp(52px,17vw,76px);line-height:1}
 .stars{font-size:42px;letter-spacing:8px;color:var(--teal)}
 .ayat{background:#fff;border:3px solid var(--teal);border-radius:16px;padding:14px 16px;max-width:330px;line-height:1.5}
@@ -102,6 +114,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
     <button class="btn" id="start-btn">MULAI MAIN</button>
+    <button class="btn alt" id="class-btn">KELAS KAMI</button>
     <button class="btn alt hidden" id="install-btn">Install untuk offline</button>
     <p class="hint">Ketuk kata yang tepat saat jatuh dari atas.<br>Tap the right words as they fall!</p>
     <p class="credit">SDIT Baitussalam 2 Cangkringan</p>
@@ -128,8 +141,21 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
     <div id="result-score">0</div>
     <p class="hint">Bertahan: <b id="time-survived">0:00</b> · Best streak: <b id="best-streak">0</b></p>
     <div class="ayat"><b>&#1585;&#1614;&#1576;&#1617;&#1616; &#1586;&#1616;&#1583;&#1606;&#1616;&#1610; &#1593;&#1616;&#1604;&#1605;&#164B;&#1575;</b><span>"Rabbii zidnii 'ilmaa" (QS. Thaahaa: 114)<br>Ya Tuhan kami, tambahkanlah ilmu kepada kami.</span></div>
+    <p class="tagline" id="coin-earn">+0 koin untuk kelas</p>
     <button class="btn" id="retry-btn">MAIN LAGI</button>
     <button class="btn alt" id="menu-btn">GANTI TEMA</button>
+    <button class="btn alt" id="to-class-btn">KE KELAS</button>
+  </div>
+
+  <div id="screen-class" class="screen hidden">
+    <div id="class-top">
+      <div class="pill">KOIN<b id="coin-val">0</b></div>
+      <button class="btn alt small" id="class-back">KEMBALI</button>
+      <button class="btn small" id="class-play">MAIN</button>
+    </div>
+    <div id="class-stage-wrap"><div id="class-stage"></div></div>
+    <div id="shop"></div>
+    <div id="class-flash" class="hidden"></div>
   </div>
 
 </div>
@@ -224,8 +250,58 @@ const CONFIG = {
   meterCorrectRefill: 5,
   meterWrongDrain: 8,
   meterMutantDrain: 12,
-  meterLevelRefill: 15
+  meterLevelRefill: 15,
+  coinDivisor: 20,
+  coinPerLevel: 5
 };
+/* SCENE: layer layout from Restu's hand-tuned slots.json (x,y,w in 1024 space) */
+const SCENE = {
+"old-wall":{group:"before",x:34,y:40,w:956,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"old-floor":{group:"before",x:66,y:452,w:892,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"wall-paint":{group:"after",x:35,y:40,w:954,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"floor-tiles":{group:"after",x:66,y:453,w:892,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"old-window":{group:"before",x:108,y:238,w:125,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"blackboard":{group:"before",x:602,y:241,w:277,rot:0,skx:0,sky:0,scx:1,scy:1,flip:true},
+"old-fan":{group:"before",x:400,y:124,w:100,rot:0,skx:0,sky:0,scx:0.48,scy:0.48,flip:false},
+"clock":{group:"before",x:724,y:222,w:60,rot:0,skx:0,sky:0,scx:1,scy:1,flip:true},
+"map":{group:"before",x:254,y:258,w:140,rot:3,skx:2,sky:-27.5,scx:0.9,scy:1.12,flip:false},
+"bookshelf":{group:"before",x:261,y:416,w:175,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"desks":{group:"both",x:250,y:528,w:490,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"teacher-desk":{group:"both",x:431,y:387,w:175,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"rugs":{group:"before",x:63,y:548,w:130,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"plant":{group:"before",x:146,y:502,w:105,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"fix-window":{group:"after",x:110,y:240,w:125,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"kaligrafi":{group:"after",x:380,y:136,w:100,rot:-13.5,skx:-34.5,sky:13,scx:1.22,scy:1.1,flip:false},
+"whiteboard":{group:"after",x:598,y:270,w:277,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"ac":{group:"after",x:239,y:181,w:150,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"rugs-new":{group:"after",x:232,y:468,w:130,rot:0,skx:0,sky:0,scx:0.5,scy:0.5,flip:false},
+"poster-map":{group:"after",x:251,y:310,w:140,rot:0,skx:0,sky:-24,scx:1,scy:1,flip:false},
+"bookshelf-new":{group:"after",x:113,y:444,w:175,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"plants-new":{group:"after",x:50,y:551,w:105,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"curtains":{group:"after",x:105,y:225,w:135,rot:0,skx:0,sky:0,scx:1,scy:1,flip:true},
+"tv":{group:"after",x:616,y:122,w:240,rot:0,skx:0,sky:0,scx:0.53,scy:0.51,flip:false},
+"flag":{group:"after",x:506,y:133,w:85,rot:0,skx:0,sky:0,scx:1,scy:1,flip:false},
+"poster-english":{group:"after",x:382,y:188,w:115,rot:0,skx:0,sky:0,scx:0.6,scy:0.6,flip:false},
+"papan-karya":{group:"after",x:407,y:310,w:85,rot:0,skx:0,sky:0,scx:1,scy:1,flip:true}
+};
+/* SHOP: replaces = hides old layer, clears = hides overlapped leftovers, requires = hidden until owned */
+const SHOP = [
+  {id:"fix-window",layer:"fix-window",name:"Perbaiki Jendela",price:100,replaces:["old-window"],requires:[],clears:[]},
+  {id:"whiteboard",layer:"whiteboard",name:"Papan Tulis",price:200,replaces:["blackboard"],requires:[],clears:[]},
+  {id:"ac",layer:"ac",name:"AC Dinding",price:250,replaces:["old-fan"],requires:[],clears:["map"]},
+  {id:"wall-paint",layer:"wall-paint",name:"Cat Dinding",price:160,replaces:["old-wall"],requires:[],clears:[]},
+  {id:"floor-tiles",layer:"floor-tiles",name:"Ubin Baru",price:180,replaces:["old-floor"],requires:[],clears:[]},
+  {id:"tv",layer:"tv",name:"Smart TV",price:300,replaces:["clock"],requires:[],clears:[]},
+  {id:"bookshelf",layer:"bookshelf-new",name:"Rak Buku",price:180,replaces:["bookshelf"],requires:[],clears:["rugs","plant"]},
+  {id:"prayer-rugs",layer:"rugs-new",name:"Sajadah Rapi",price:130,replaces:["rugs"],requires:[],clears:["bookshelf"]},
+  {id:"plants",layer:"plants-new",name:"Tanaman Segar",price:150,replaces:["plant"],requires:[],clears:["rugs"]},
+  {id:"curtains",layer:"curtains",name:"Gorden",price:130,replaces:[],requires:["fix-window"],clears:[]},
+  {id:"poster-map",layer:"poster-map",name:"Peta Dunia",price:120,replaces:["map"],requires:[],clears:[]},
+  {id:"poster-english",layer:"poster-english",name:"Poster Gambar",price:120,replaces:[],requires:[],clears:["old-fan"]},
+  {id:"kaligrafi",layer:"kaligrafi",name:"Kaligrafi",price:200,replaces:[],requires:["ac"],clears:[]},
+  {id:"flag",layer:"flag",name:"Bendera Merah Putih",price:100,replaces:[],requires:[],clears:[]},
+  {id:"papan-karya",layer:"papan-karya",name:"Papan Karya",price:150,replaces:[],requires:[],clears:[]}
+];
 /* --- engine --- */
 
 
@@ -278,10 +354,8 @@ function pool() {
 }
 
 function show(name) {
-  screens.title.classList.add("hidden");
-  screens.game.classList.add("hidden");
-  screens.result.classList.add("hidden");
-  screens[name].classList.remove("hidden");
+  Array.prototype.forEach.call(document.querySelectorAll(".screen"), (s) => s.classList.add("hidden"));
+  $("screen-" + name).classList.remove("hidden");
 }
 
 function fmtTime(s) {
@@ -591,6 +665,10 @@ function endGame() {
   $("result-label").textContent = state.score > 0
     ? "Alhamdulillah, selesai!"
     : "Coba lagi, ya!";
+  const runCoins = Math.floor(Math.max(0, state.score) / CONFIG.coinDivisor) + CONFIG.coinPerLevel * state.level;
+  save.coins += runCoins;
+  persist();
+  $("coin-earn").textContent = "+" + runCoins + " koin untuk kelas!";
   show("result");
   sfx.chime();
   confetti();
@@ -715,6 +793,125 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
   });
 }
+
+/* ---------- classroom renovation: coins, shop, layered scene ---------- */
+const SAVE_KEY = "wordrain.v1";
+const FLOOR_ITEMS = ["bookshelf","bookshelf-new","desks","teacher-desk","rugs","rugs-new","plant","plants-new"];
+function loadSave(){
+  const d = {coins: 0, owned: []};
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) Object.assign(d, JSON.parse(raw));
+  } catch (e) {}
+  return d;
+}
+const save = loadSave();
+function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+function owns(id){ return save.owned.indexOf(id) >= 0; }
+function shopByLayer(name){
+  for (const it of SHOP) if (it.layer === name) return it;
+  return null;
+}
+function sceneVisible(name){
+  const s = SCENE[name];
+  if (!s) return true;
+  if (s.group === "both") return true;
+  if (s.group === "after") {
+    const it = shopByLayer(name);
+    return it ? owns(it.id) : false;
+  }
+  for (const it of SHOP) {
+    if (!owns(it.id)) continue;
+    if (it.replaces.indexOf(name) >= 0 || it.clears.indexOf(name) >= 0) return false;
+  }
+  return true;
+}
+function buildScene(){
+  const stage = $("class-stage");
+  stage.innerHTML = "";
+  const base = document.createElement("img");
+  base.src = "assets/shell-base-cut.png";
+  base.alt = "";
+  base.style.cssText = "left:0;top:0;width:1024px";
+  stage.appendChild(base);
+  const names = Object.keys(SCENE);
+  const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
+    .concat(names.filter((n) => FLOOR_ITEMS.indexOf(n) >= 0));
+  ordered.forEach((name) => {
+    const s = SCENE[name];
+    const img = document.createElement("img");
+    img.src = "assets/" + name + "-cut.png";
+    img.alt = name;
+    img.style.left = s.x + "px";
+    img.style.top = s.y + "px";
+    img.style.width = s.w + "px";
+    img.style.transform = "rotate(" + s.rot + "deg) skewX(" + s.skx + "deg) skewY(" +
+      s.sky + "deg) scale(" + (s.flip ? -s.scx : s.scx) + "," + s.scy + ")";
+    img.style.display = sceneVisible(name) ? "" : "none";
+    stage.appendChild(img);
+  });
+}
+function fitClass(){
+  const wrap = $("class-stage-wrap");
+  const z = wrap.clientWidth / 1024;
+  $("class-stage").style.transform = "scale(" + z + ")";
+}
+function classFlash(msg){
+  const f = $("class-flash");
+  f.textContent = msg;
+  f.classList.remove("hidden");
+  setTimeout(() => f.classList.add("hidden"), 1100);
+}
+function renderShop(){
+  const wrap = $("shop");
+  wrap.innerHTML = "";
+  SHOP.forEach((it) => {
+    if (!it.requires.every(owns)) return;
+    const card = document.createElement("div");
+    card.className = "shop-item";
+    const img = document.createElement("img");
+    img.src = "assets/" + it.layer + "-cut.png";
+    img.alt = it.name;
+    const nm = document.createElement("span");
+    nm.className = "nm";
+    nm.textContent = it.name;
+    const btn = document.createElement("button");
+    if (owns(it.id)) {
+      btn.textContent = "DIMILIKI";
+      btn.disabled = true;
+      btn.className = "alt";
+    } else {
+      btn.textContent = it.price + " koin";
+      btn.className = save.coins >= it.price ? "" : "alt";
+      btn.addEventListener("click", () => buy(it));
+    }
+    card.append(img, nm, btn);
+    wrap.appendChild(card);
+  });
+}
+function buy(it){
+  if (owns(it.id) || save.coins < it.price) return;
+  save.coins -= it.price;
+  save.owned.push(it.id);
+  persist();
+  sfx.heal();
+  buildScene();
+  renderShop();
+  $("coin-val").textContent = save.coins;
+  classFlash(it.name + " terpasang!");
+}
+function openClass(){
+  show("class");
+  $("coin-val").textContent = save.coins;
+  fitClass();
+  buildScene();
+  renderShop();
+}
+$("class-btn").addEventListener("click", openClass);
+$("to-class-btn").addEventListener("click", openClass);
+$("class-back").addEventListener("click", () => show("title"));
+$("class-play").addEventListener("click", startGame);
+window.addEventListener("resize", fitClass);
 
 updateHud();
 requestAnimationFrame(loop);
