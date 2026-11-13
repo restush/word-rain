@@ -90,6 +90,9 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 #class-stage-wrap{width:100%;max-width:600px;aspect-ratio:1;position:relative;flex:0 0 auto}
 #class-stage{position:absolute;top:0;left:0;width:1024px;height:1024px;transform-origin:top left}
 #class-stage img{position:absolute;user-select:none;-webkit-user-drag:none}
+#class-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--cream);border-radius:12px;z-index:9;font-size:15px;font-weight:bold}
+.spinner{width:40px;height:40px;border:5px solid var(--sun);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 #shop{display:flex;gap:8px;overflow-x:auto;width:100%;padding:4px 2px 10px;margin-top:auto}
 .shop-item{flex:0 0 108px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:6px;text-align:center;font-size:12px}
 .shop-item img{width:66px;height:66px;object-fit:contain}
@@ -162,7 +165,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="btn alt small" id="class-back">KEMBALI</button>
       <button class="btn small" id="class-play">MAIN</button>
     </div>
-    <div id="class-stage-wrap"><div id="class-stage"></div></div>
+    <div id="class-stage-wrap"><div id="class-stage"></div><div id="class-loading"><div class="spinner"></div><span id="class-loading-text">Memuat kelas...</span></div></div>
     <div id="shop"></div>
     <div id="class-flash" class="hidden"></div>
   </div>
@@ -913,12 +916,31 @@ function buy(it){
   $("coin-val").textContent = save.coins;
   classFlash(it.name + " terpasang!");
 }
+function preloadScene(cb){
+  const files = ["shell-base-cut.webp"].concat(Object.keys(SCENE).map((n) => n + "-cut.webp"));
+  let left = files.length, failed = 0;
+  files.forEach((f) => {
+    const im = new Image();
+    im.onload = im.onerror = () => {
+      if (!im.naturalWidth) failed++;
+      if (--left === 0) cb(failed);
+    };
+    im.src = "assets/" + f;
+  });
+}
 function openClass(){
   show("class");
   $("coin-val").textContent = save.coins;
   fitClass();
-  buildScene();
-  renderShop();
+  const overlay = $("class-loading");
+  overlay.classList.remove("hidden");
+  $("class-loading-text").textContent = "Memuat kelas...";
+  preloadScene((failed) => {
+    buildScene();
+    renderShop();
+    overlay.classList.add("hidden");
+    if (failed) classFlash(failed + " gambar butuh internet sekali");
+  });
 }
 $("class-btn").addEventListener("click", openClass);
 $("to-class-btn").addEventListener("click", openClass);
