@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Temp: Word Rain (Grade 3 English)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A535C">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{--cream:#FDF6E3;--teal:#1A535C;--sun:#FFD166;--coral:#FF6B6B;--mint:#4ECDC4}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -68,6 +72,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
     <button class="btn" id="start-btn">MULAI MAIN</button>
+    <button class="btn alt hidden" id="install-btn">Install untuk offline</button>
     <p class="hint">Ketuk kata yang tepat saat jatuh dari atas.<br>Tap the right words as they fall!</p>
     <p class="credit">SDIT Baitussalam 2 Cangkringan</p>
   </div>
@@ -453,6 +458,29 @@ Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"), (btn) => {
     sfx.pop();
   });
 });
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  window.deferredPrompt = e;
+  $("install-btn").classList.remove("hidden");
+});
+$("install-btn").addEventListener("click", () => {
+  const p = window.deferredPrompt;
+  if (!p) return;
+  p.prompt();
+  p.userChoice.finally(() => {
+    window.deferredPrompt = null;
+    $("install-btn").classList.add("hidden");
+  });
+});
+window.addEventListener("appinstalled", () => {
+  $("install-btn").classList.add("hidden");
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 
 updateHud();
 requestAnimationFrame(loop);
