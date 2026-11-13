@@ -75,8 +75,10 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 @keyframes mutatefx{45%{transform:scale(1.25)}}
 .mutate{animation:mutatefx .35s}
 .hearts{color:var(--bad)}
-.card-inner.mutant{background:var(--bad);border-color:#5A0A10}
-.card-inner.mutant .word{color:var(--cream)}
+.card-inner.must-click{background:var(--bad);border-color:#5A0A10}
+.card-inner.must-click .word{color:var(--cream)}
+.card-inner.must-not-click{background:#2B2B33;border-color:#000}
+.card-inner.must-not-click .word{color:var(--cream)}
 .card-inner.buff{background:var(--sun)}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
@@ -246,6 +248,7 @@ const CONFIG = {
   targetFloor: 0.16,
   mutatePerSec: 0.03,
   mutateMaxY: 0.55,
+  mustClickRatio: 0.5,
   defuseScore: 5,
   buffChance: 0.05,
   baseSpeed: 55,
@@ -509,12 +512,15 @@ function loseLife() {
 
 
 function mutate(item){
-  item.kind = "mutant";
-  item.el.setAttribute("aria-label", "danger: " + item.data.en);
-  item.inner.classList.add("mutant");
+  const mustClick = Math.random() < CONFIG.mustClickRatio;
+  item.kind = mustClick ? "must-click" : "must-not-click";
+  item.el.setAttribute("aria-label", (mustClick ? "must click: " : "must not click: ") + item.data.en);
+  item.inner.classList.add(mustClick ? "must-click" : "must-not-click");
   item.inner.classList.add("mutate");
-  item.inner.innerHTML = '<span class="pic">\u2620</span><span class="word">' + item.data.en + "</span>";
-  floatText("Watch out!", item.x, item.y, true);
+  item.inner.innerHTML = mustClick
+    ? '<span class="pic">\u2620</span><span class="word">' + item.data.en + "</span>"
+    : '<span class="pic">\uD83D\uDCA3</span><span class="word">' + item.data.en + "</span>";
+  floatText(mustClick ? "Must Click!" : "Must Not Click!", item.x, item.y, true);
   sfx.mutate();
   setTimeout(() => item.inner.classList.remove("mutate"), 380);
 }
@@ -523,11 +529,8 @@ function spawnCard(kind, data) {
   el.className = "card" + (kind === "buff" ? " buff-glow" : "");
   el.type = "button";
   const inner = document.createElement("span");
-  inner.className = "card-inner" + (kind === "mutant" ? " mutant" : kind === "buff" ? " buff" : "");
-  if (kind === "mutant") {
-    inner.innerHTML = '<span class="pic">\u2620</span><span class="word">' + data.en + "</span>";
-    el.setAttribute("aria-label", "danger: " + data.en);
-  } else if (kind === "buff") {
+  inner.className = "card-inner" + (kind === "buff" ? " buff" : "");
+  if (kind === "buff") {
     inner.innerHTML = '<span class="pic">\u2764\uFE0F</span><span class="word">+1</span>';
     el.setAttribute("aria-label", "extra life");
   } else {
@@ -591,7 +594,7 @@ function tapItem(item) {
     updateHud();
     return;
   }
-  if (item.kind === "mutant") {
+  if (item.kind === "must-click") {
     state.score += CONFIG.defuseScore;
     sfx.pop();
     ring(item.x + 46, item.y + 30);
@@ -599,6 +602,15 @@ function tapItem(item) {
     floatText("Defused!", item.x, item.y, false);
     setTimeout(() => item.el.remove(), 360);
     updateHud();
+    return;
+  }
+  if (item.kind === "must-not-click") {
+    state.streak = 0;
+    sfx.hurt();
+    item.inner.classList.add("wrongpop");
+    floatText("-1 \u2665", item.x, item.y, true);
+    setTimeout(() => item.el.remove(), 460);
+    loseLife();
     return;
   }
   const ok = state.roundType === "category"
@@ -757,7 +769,7 @@ function loop(t) {
       if (item.y > h + 20) {
         item.dead = true;
         item.el.remove();
-        if (item.kind === "mutant") {
+        if (item.kind === "must-click") {
           floatText("-1 \u2665", item.x, h - 60, true);
           sfx.hurt();
           loseLife();
