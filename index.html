@@ -841,7 +841,7 @@ function buildScene(){
   const stage = $("class-stage");
   stage.innerHTML = "";
   const base = document.createElement("img");
-  base.src = "assets/shell-base-cut.png";
+  base.src = "assets/shell-base-cut.webp";
   base.alt = "";
   base.style.cssText = "left:0;top:0;width:1024px";
   stage.appendChild(base);
@@ -851,7 +851,7 @@ function buildScene(){
   ordered.forEach((name) => {
     const s = SCENE[name];
     const img = document.createElement("img");
-    img.src = "assets/" + name + "-cut.png";
+    img.src = "assets/" + name + "-cut.webp";
     img.alt = name;
     img.style.left = s.x + "px";
     img.style.top = s.y + "px";
@@ -881,7 +881,7 @@ function renderShop(){
     const card = document.createElement("div");
     card.className = "shop-item";
     const img = document.createElement("img");
-    img.src = "assets/" + it.layer + "-cut.png";
+    img.src = "assets/" + it.layer + "-cut.webp";
     img.alt = it.name;
     const nm = document.createElement("span");
     nm.className = "nm";

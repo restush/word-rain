@@ -60,7 +60,7 @@ FINAL = [
 
 
 def load_cut(name):
-    p = ASSETS / (name + "-cut.png")
+    p = ASSETS / (name + "-cut.webp")
     s = Image.open(p).convert("RGBA")
     bb = s.split()[3].getbbox()
     return s.crop(bb)
@@ -89,7 +89,7 @@ def main():
         base = Image.open(ASSETS / bg).convert("RGBA")
         names = FINAL if mode == "final" else ORDER
         for name in names:
-            cut = ASSETS / (name + "-cut.png")
+            cut = ASSETS / (name + "-cut.webp")
             if not cut.exists():
                 print("skip (missing):", name)
                 continue

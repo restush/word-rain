@@ -95,7 +95,7 @@ const layers = [];
 let sel = null;
 
 const shell = document.createElement("img");
-shell.src = ASSET + "shell-base-cut.png";
+shell.src = ASSET + "shell-base-cut.webp";
 shell.style.cssText = "position:absolute;left:0;top:0;width:1024px";
 stage.appendChild(shell);
 
@@ -210,7 +210,7 @@ function init(){
     const name = row[0];
     const img = document.createElement("img");
     img.className = "layer";
-    img.src = ASSET + name + "-cut.png";
+    img.src = ASSET + name + "-cut.webp";
     const st = {name: name, group: row[4], x: row[1], y: row[2], w: row[3], rot: 0, skx: 0, sky: 0,
       scx: 1, scy: 1, flip: false, visible: true, el: img};
     img.addEventListener("pointerdown", (e) => startDrag(e, st));
