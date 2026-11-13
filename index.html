@@ -216,7 +216,15 @@ const CONFIG = {
   capPerLevel: 0.5,
   maxCap: 10,
   starMid: 300,
-  starHigh: 600
+  starHigh: 600,
+  meterStart: 100,
+  meterMax: 100,
+  meterDrainPerSec: 3,
+  meterDrainGrowPerLevel: 0.5,
+  meterCorrectRefill: 5,
+  meterWrongDrain: 8,
+  meterMutantDrain: 12,
+  meterLevelRefill: 15
 };
 /* --- engine --- */
 
@@ -254,8 +262,10 @@ const state = {
   streak: 0,
   bestStreak: 0,
   lives: CONFIG.maxLives,
+  meter: CONFIG.meterStart,
   timeSurvived: 0,
   running: false,
+  ended: false,
   items: [],
   lastT: 0,
   usedWords: []
@@ -497,6 +507,7 @@ function tapItem(item) {
   }
   if (item.kind === "mutant") {
     state.streak = 0;
+    state.meter = Math.max(0, state.meter - CONFIG.meterMutantDrain);
     sfx.hurt();
     item.inner.classList.add("wrongpop");
     floatText("-1 \u2665", item.x, item.y, true);
@@ -511,6 +522,7 @@ function tapItem(item) {
     state.streak++;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
     state.score += CONFIG.correctScore;
+    state.meter = Math.min(CONFIG.meterMax, state.meter + CONFIG.meterCorrectRefill);
     sfx.pop();
     ring(item.x + 46, item.y + 30);
     item.inner.classList.add("pop");
@@ -522,6 +534,7 @@ function tapItem(item) {
   } else {
     state.streak = 0;
     state.score -= CONFIG.wrongPenalty;
+    state.meter = Math.max(0, state.meter - CONFIG.meterWrongDrain);
     sfx.buzz();
     item.inner.classList.add("wrongpop");
     floatText("-" + CONFIG.wrongPenalty, item.x, item.y, true);
@@ -566,6 +579,8 @@ function waveUpdate() {
 }
 
 function endGame() {
+  if (state.ended) return;
+  state.ended = true;
   state.running = false;
   clearItems();
   const stars = state.score >= CONFIG.starHigh ? 3 : state.score >= CONFIG.starMid ? 2 : 1;
@@ -591,9 +606,12 @@ function startGame() {
   state.levelTimer = CONFIG.levelSeconds;
   state.spawnTimer = 0;
   state.timeSurvived = 0;
+  state.meter = CONFIG.meterStart;
   state.usedWords = [];
+  state.ended = false;
   clearItems();
   show("game");
+  state.running = true;
   sfx.start();
   waveUpdate();
   flash("Level 1", 700);
@@ -607,12 +625,20 @@ function loop(t) {
   if (state.running) {
     state.timeSurvived += dt;
     $("time-val").textContent = fmtTime(state.timeSurvived);
+    const drain = CONFIG.meterDrainPerSec + (state.level - 1) * CONFIG.meterDrainGrowPerLevel;
+    state.meter = Math.max(0, state.meter - drain * dt);
+    $("timer-fill").style.width = state.meter + "%";
+    $("timerbar").classList.toggle("low", state.meter < 25);
+    if (state.meter <= 0) {
+      endGame();
+      requestAnimationFrame(loop);
+      return;
+    }
     state.levelTimer -= dt;
-    $("timer-fill").style.width =
-      Math.max(0, (state.levelTimer / CONFIG.levelSeconds) * 100) + "%";
     if (state.levelTimer <= 0) {
       state.level++;
       state.levelTimer += CONFIG.levelSeconds;
+      state.meter = Math.min(CONFIG.meterMax, state.meter + CONFIG.meterLevelRefill);
       waveUpdate();
       flash("Level " + state.level, 700);
       sfx.chime();
