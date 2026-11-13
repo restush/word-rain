@@ -247,7 +247,8 @@ const CONFIG = {
   targetChance: 0.42,
   targetDropPerLevel: 0.03,
   targetFloor: 0.16,
-  mutatePerSec: 0.03,
+  mutatePerSec: 0.01,
+  mutateGrowPerLevel: 0.008,
   mutateMaxY: 0.55,
   mustClickRatio: 0.5,
   defuseScore: 5,
@@ -764,7 +765,7 @@ function loop(t) {
       item.el.style.transform =
         "translate(" + item.x + "px, " + item.y + "px)";
       if (item.kind === "normal" && item.y > -20 && item.y < h * CONFIG.mutateMaxY &&
-          Math.random() < CONFIG.mutatePerSec * dt) {
+          Math.random() < (CONFIG.mutatePerSec + (state.level - 1) * CONFIG.mutateGrowPerLevel) * dt) {
         mutate(item);
       }
       if (item.y > h + 20) {
