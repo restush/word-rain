@@ -37,10 +37,19 @@ WALLS: plain painted wall top to bottom, NO wood paneling/wainscoting
      R prayer rugs (corner)
      p plants (front corner)
 
-Z-ORDER: wall-paint + floor-tiles render UNDER everything.
+Z-ORDER (Restu architecture, decomposition validated 2026-11-13):
+  1. shell (empty room) <- base items are NOT baked in
+  2. wall-paint + floor-tiles (big region treatments)
+  3. old items: old-fan, old-window, blackboard, clock, map, bookshelf,
+     desks (group), teacher-desk (group), rugs (group), plant
+  4. replacement layers over their old item: ac covers old-fan,
+     fix-window covers old-window, whiteboard covers blackboard, clock upgrade
+  5. add-on layers (float above): tv (ABOVE board), bookshelf upgrade, posters,
+     kaligrafi, flag, papan-karya, curtains (requires fix-window), plants upgrade,
+     prayer-rugs upgrade
 REPLACEMENT LAYERS (geometry must match base.png exactly, generate with base as ref):
-  fix-window -> W slots, whiteboard -> BOARD slots, ac -> old fan slot,
-  floor-tiles -> floor, wall-paint -> wall strips, clock -> clock slot.
+  fix-window -> old-window slot, whiteboard -> blackboard slot, ac -> old-fan slot,
+  floor-tiles -> floor (under items!), wall-paint -> wall strips (under items!).
 ADD-ON LAYERS (float above, position by percentage):
   tv (ABOVE board), bookshelf, poster-english, poster-map, kaligrafi, flag,
   papan-karya, curtains (requires fix-window), plants, prayer-rugs.
