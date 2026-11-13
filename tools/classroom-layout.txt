@@ -4,6 +4,9 @@ Reference: Habbo-style dollhouse classroom (Restu, 2026-11-13). Two back walls m
 at a vertical corner (center back); floor is a diamond below. NO light fixture exists
 (Restu: vertical light removed entirely). The dim wall fan stays in the base and is
 REPLACED by the ac purchase. TV sits ABOVE the blackboard.
+WALLS: plain painted wall top to bottom, NO wood paneling/wainscoting
+(Indonesian classroom). FUTURE: nicer bottom-wall treatment can be designed later
+(Restu hint 2026-11-13), possibly as an add-on layer slot.
 
               ·  ·  ·  ·  ·  ·
            ╱  M  [W] [W]  A?  ╲         W2 LEFT WALL
