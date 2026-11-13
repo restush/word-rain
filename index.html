@@ -132,10 +132,11 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="school" aria-pressed="false">School</button>
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
-    <p class="hint"><b>Ketuk kata yang tepat saat jatuh dari atas.</b><br><span class="hint-en">Tap the right words as they fall!</span><br><b class="hint-rule">\uD83D\uDCA3 Must Click: tap! \u2620 Must Not Click: jangan tap!</b></p>
+    <p class="hint"><b>Ketuk kata yang tepat saat jatuh dari atas.</b><br><span class="hint-en">Tap the right words as they fall!</span><br><b class="hint-rule">💣 Must Click: tap! ☠ Must Not Click: jangan tap!</b></p>
     <button class="btn" id="start-btn">Start Word Rain<br><span id="start-sub">(Mixed)</span></button>
     <button class="btn alt" id="class-btn">Classroom</button>
     <button class="btn alt hidden" id="install-btn">Install for offline</button>
+    <p class="hint hidden" id="ahs-hint">Tidak ada tombol install? Tambahkan ke layar utama lewat menu browser. <span class="hint-en">No button? Use your browser menu: "Add to Home Screen".</span></p>
     <p class="credit">SDIT Baitussalam 2 Cangkringan</p>
   </div>
 
@@ -808,7 +809,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   window.deferredPrompt = e;
   $("install-btn").classList.remove("hidden");
+  $("ahs-hint").classList.add("hidden");
 });
+if (!("onbeforeinstallprompt" in window)) $("ahs-hint").classList.remove("hidden");
+setTimeout(() => { if (!window.deferredPrompt) $("ahs-hint").classList.remove("hidden"); }, 4000);
 $("install-btn").addEventListener("click", () => {
   const p = window.deferredPrompt;
   if (!p) return;
