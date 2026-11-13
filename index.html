@@ -72,6 +72,12 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .btn:hover{filter:brightness(1.1)}
 .pack-btn:hover{background:#FFF3CF}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}.confetti,.ring,.float{display:none}}
+.hearts{color:var(--bad)}
+.card-inner.mutant{background:var(--bad);border-color:#5A0A10}
+.card-inner.mutant .word{color:var(--cream)}
+.card-inner.buff{background:var(--sun)}
+@keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
+.card.buff-glow{animation:buffglow 1.2s infinite}
 #result-score{font-size:clamp(52px,17vw,76px);line-height:1}
 .stars{font-size:42px;letter-spacing:8px;color:var(--teal)}
 .ayat{background:#fff;border:3px solid var(--teal);border-radius:16px;padding:14px 16px;max-width:330px;line-height:1.5}
@@ -103,8 +109,9 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 
   <div id="screen-game" class="screen hidden">
     <div id="topbar">
+      <div class="pill">LIVES<b id="lives-val" class="hearts">3</b></div>
       <div class="pill">SKOR<b id="score-val">0</b></div>
-      <div class="pill">ROUND<b id="round-val">1/5</b></div>
+      <div class="pill">TIME<b id="time-val">0:00</b></div>
       <div class="pill">STREAK<b id="streak-val">0</b></div>
     </div>
     <div id="prompt">
@@ -119,7 +126,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
     <p class="tagline" id="result-label">Alhamdulillah, selesai!</p>
     <div class="stars" id="stars">&#9733;&#9733;&#9733;</div>
     <div id="result-score">0</div>
-    <p class="hint">Skor kamu. Best streak: <b id="best-streak">0</b></p>
+    <p class="hint">Bertahan: <b id="time-survived">0:00</b> · Best streak: <b id="best-streak">0</b></p>
     <div class="ayat"><b>&#1585;&#1614;&#1576;&#1617;&#1616; &#1586;&#1616;&#1583;&#1606;&#1616;&#1610; &#1593;&#1616;&#1604;&#1605;&#164B;&#1575;</b><span>"Rabbii zidnii 'ilmaa" (QS. Thaahaa: 114)<br>Ya Tuhan kami, tambahkanlah ilmu kepada kami.</span></div>
     <button class="btn" id="retry-btn">MAIN LAGI</button>
     <button class="btn alt" id="menu-btn">GANTI TEMA</button>
@@ -187,7 +194,33 @@ const CONTENT = {
 const CATEGORY_WORDS = {animal:"animal",color:"color",food:"food",school:"school"};
 const CATEGORY_ID = {animal:"hewan",color:"warna",food:"makanan",school:"alat sekolah"};
 const ROUND_PLAN = ["word", "category", "listen", "picture", "word", "category"];
+const CONFIG = {
+  maxLives: 3,
+  levelSeconds: 30,
+  correctScore: 10,
+  wrongPenalty: 5,
+  targetChance: 0.42,
+  targetDropPerLevel: 0.03,
+  targetFloor: 0.16,
+  mutantChance: 0.06,
+  mutantGrowPerLevel: 0.005,
+  mutantMax: 0.14,
+  mutantFallRisk: 0.5,
+  buffChance: 0.05,
+  baseSpeed: 55,
+  speedPerLevel: 7,
+  baseSpawn: 0.9,
+  spawnDropPerLevel: 0.06,
+  spawnFloor: 0.42,
+  baseCap: 6,
+  capPerLevel: 0.5,
+  maxCap: 10,
+  starMid: 300,
+  starHigh: 600
+};
 /* --- engine --- */
+
+
 
 
 
@@ -214,19 +247,14 @@ const state = {
   roundType: "word",
   target: null,
   targetTag: null,
-  need: 0,
-  hits: 0,
-  wrongs: 0,
-  totalHits: 0,
-  totalNeed: 0,
+  level: 1,
+  levelTimer: 0,
+  spawnTimer: 0,
   score: 0,
   streak: 0,
   bestStreak: 0,
-  round: 0,
-  totalRounds: ROUND_PLAN.length,
-  timeLeft: 0,
-  roundTime: 35,
-  spawnTimer: 0,
+  lives: CONFIG.maxLives,
+  timeSurvived: 0,
   running: false,
   items: [],
   lastT: 0,
@@ -244,6 +272,12 @@ function show(name) {
   screens.game.classList.add("hidden");
   screens.result.classList.add("hidden");
   screens[name].classList.remove("hidden");
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60);
+  return m + ":" + (ss < 10 ? "0" : "") + ss;
 }
 
 /* Web Audio: sounds are generated, zero asset bytes */
@@ -274,6 +308,8 @@ function tone(freq, dur, type, vol, slide) {
 const sfx = {
   pop: () => tone(660, 0.12, "sine", 0.25, 990),
   buzz: () => { tone(190, 0.16, "square", 0.12); tone(140, 0.2, "square", 0.1, 90); },
+  hurt: () => { tone(220, 0.18, "square", 0.16, 110); setTimeout(() => tone(110, 0.28, "square", 0.14, 70), 140); },
+  heal: () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.16, "triangle", 0.18), i * 90)); },
   chime: () => {
     tone(523, 0.18, "triangle", 0.2);
     setTimeout(() => tone(659, 0.18, "triangle", 0.2), 120);
@@ -305,7 +341,10 @@ function updateHud() {
   scoreEl.classList.remove("punch");
   void scoreEl.offsetWidth;
   scoreEl.classList.add("punch");
-  $("round-val").textContent = state.round + "/" + state.totalRounds;
+  $("lives-val").textContent =
+    "\u2665".repeat(Math.max(0, state.lives)) +
+    "\u2661".repeat(Math.max(0, CONFIG.maxLives - state.lives));
+  $("time-val").textContent = fmtTime(state.timeSurvived);
   $("streak-val").textContent = state.streak;
   $("streak-val").parentElement.classList.toggle("hot", state.streak >= 3);
 }
@@ -359,39 +398,45 @@ function clearItems() {
   state.items = [];
 }
 
+function loseLife() {
+  state.lives--;
+  updateHud();
+  screens.game.classList.remove("shake-it");
+  void screens.game.offsetWidth;
+  screens.game.classList.add("shake-it");
+  if (state.lives <= 0) endGame();
+}
 
-function spawnItem() {
-  const list = pool();
-  let data;
-  const r = Math.random();
-  const single = state.roundType !== "category";
-  if (single && r < 0.42) {
-    data = state.target;
-  } else if (state.roundType === "category" && r < 0.5) {
-    const t = list.filter((w) => w.tag === state.targetTag);
-    data = t[Math.floor(Math.random() * t.length)];
-  } else {
-    data = list[Math.floor(Math.random() * list.length)];
-  }
+
+function spawnCard(kind, data) {
   const el = document.createElement("button");
-  el.className = "card";
+  el.className = "card" + (kind === "buff" ? " buff-glow" : "");
   el.type = "button";
   const inner = document.createElement("span");
-  inner.className = "card-inner";
-  if (state.roundType === "word" || state.roundType === "listen") {
-    inner.innerHTML = '<span class="word">' + data.en + "</span>";
-  } else if (state.roundType === "picture") {
-    inner.innerHTML = fmtPic(data.pic, true);
+  inner.className = "card-inner" + (kind === "mutant" ? " mutant" : kind === "buff" ? " buff" : "");
+  if (kind === "mutant") {
+    inner.innerHTML = '<span class="pic">\u2620</span><span class="word">' + data.en + "</span>";
+    el.setAttribute("aria-label", "danger: " + data.en);
+  } else if (kind === "buff") {
+    inner.innerHTML = '<span class="pic">\u2764\uFE0F</span><span class="word">+1</span>';
+    el.setAttribute("aria-label", "extra life");
   } else {
-    inner.innerHTML = fmtPic(data.pic, false) + '<span class="word">' + data.en + "</span>";
+    if (state.roundType === "word" || state.roundType === "listen") {
+      inner.innerHTML = '<span class="word">' + data.en + "</span>";
+    } else if (state.roundType === "picture") {
+      inner.innerHTML = fmtPic(data.pic, true);
+    } else {
+      inner.innerHTML = fmtPic(data.pic, false) + '<span class="word">' + data.en + "</span>";
+    }
+    el.setAttribute("aria-label", data.en);
   }
   inner.style.transform = "rotate(" + (Math.random() * 8 - 4).toFixed(1) + "deg)";
   el.appendChild(inner);
-  el.setAttribute("aria-label", data.en);
   const maxX = sky.clientWidth - 106;
   const x = 6 + Math.random() * Math.max(6, maxX);
-  const item = {el: el, inner: inner, data: data, x: x, y: -110,
-    speed: 55 + Math.random() * 35 + state.round * 8, dead: false};
+  const item = {el: el, inner: inner, data: data, kind: kind, x: x, y: -110,
+    speed: CONFIG.baseSpeed + (state.level - 1) * CONFIG.speedPerLevel + Math.random() * 35,
+    dead: false};
   el.style.transform = "translate(" + x + "px, -110px)";
   el.addEventListener("pointerdown", (e) => { e.preventDefault(); tapItem(item); });
   el.addEventListener("keydown", (e) => {
@@ -401,53 +446,99 @@ function spawnItem() {
   state.items.push(item);
 }
 
+function spawnItem() {
+  if (state.lives < CONFIG.maxLives &&
+      !state.items.some((it) => it.kind === "buff") &&
+      Math.random() < CONFIG.buffChance) {
+    spawnCard("buff", {en: "+1", id: "+1", pic: "\u2764", tag: "buff"});
+    return;
+  }
+  const mutantChance = Math.min(CONFIG.mutantMax,
+    CONFIG.mutantChance + (state.level - 1) * CONFIG.mutantGrowPerLevel);
+  if (Math.random() < mutantChance) {
+    const list = pool();
+    let data;
+    if (state.roundType === "category") {
+      const t = list.filter((w) => w.tag === state.targetTag);
+      data = t[Math.floor(Math.random() * t.length)];
+    } else {
+      data = state.target;
+    }
+    spawnCard("mutant", data);
+    return;
+  }
+  const list = pool();
+  let data;
+  const single = state.roundType !== "category";
+  const targetChance = Math.max(CONFIG.targetFloor,
+    CONFIG.targetChance - (state.level - 1) * CONFIG.targetDropPerLevel);
+  if (single && Math.random() < targetChance) {
+    data = state.target;
+  } else if (state.roundType === "category" && Math.random() < 0.5) {
+    const t = list.filter((w) => w.tag === state.targetTag);
+    data = t[Math.floor(Math.random() * t.length)];
+  } else {
+    data = list[Math.floor(Math.random() * list.length)];
+  }
+  spawnCard("normal", data);
+}
+
 function tapItem(item) {
   if (!state.running || item.dead) return;
+  item.dead = true;
+  if (item.kind === "buff") {
+    state.lives = Math.min(CONFIG.maxLives, state.lives + 1);
+    sfx.heal();
+    item.inner.classList.add("pop");
+    floatText("+1 \u2665", item.x, item.y, false);
+    setTimeout(() => item.el.remove(), 360);
+    updateHud();
+    return;
+  }
+  if (item.kind === "mutant") {
+    state.streak = 0;
+    sfx.hurt();
+    item.inner.classList.add("wrongpop");
+    floatText("-1 \u2665", item.x, item.y, true);
+    setTimeout(() => item.el.remove(), 460);
+    loseLife();
+    return;
+  }
   const ok = state.roundType === "category"
     ? item.data.tag === state.targetTag
     : item.data.en === state.target.en;
-  item.dead = true;
   if (ok) {
-    state.hits++;
-    state.totalHits++;
     state.streak++;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
-    state.score += 10;
+    state.score += CONFIG.correctScore;
     sfx.pop();
     ring(item.x + 46, item.y + 30);
     item.inner.classList.add("pop");
-    floatText("+10", item.x, item.y, false);
+    floatText("+" + CONFIG.correctScore, item.x, item.y, false);
     if (state.streak === 3) floatText("Great!", item.x, item.y - 34, false);
     if (state.streak === 5) floatText("Amazing!", item.x, item.y - 34, false);
     if (state.streak === 8) floatText("MasyaAllah!", item.x, item.y - 34, false);
     setTimeout(() => item.el.remove(), 360);
   } else {
-    state.wrongs++;
     state.streak = 0;
-    state.score -= 5;
+    state.score -= CONFIG.wrongPenalty;
     sfx.buzz();
     item.inner.classList.add("wrongpop");
-    floatText("-5", item.x, item.y, true);
+    floatText("-" + CONFIG.wrongPenalty, item.x, item.y, true);
     screens.game.classList.remove("shake-it");
     void screens.game.offsetWidth;
     screens.game.classList.add("shake-it");
     setTimeout(() => item.el.remove(), 460);
   }
   updateHud();
-  if (state.hits >= state.need) endRound();
 }
 
-function startRound() {
-  state.round++;
-  $("round-val").textContent = state.round + "/" + state.totalRounds;
-  clearItems();
-  state.wrongs = 0;
-  const plan = ROUND_PLAN[(state.round - 1) % ROUND_PLAN.length];
+function waveUpdate() {
+  const plan = ROUND_PLAN[(state.level - 1) % ROUND_PLAN.length];
   state.roundType = plan === "listen" && !TTS ? "word" : plan;
   const tags = PACK_TAGS[state.pack] || PACK_TAGS.mixed;
   if (state.roundType === "category") {
     state.targetTag = tags[Math.floor(Math.random() * tags.length)];
-    state.need = 8;
     $("prompt-text").innerHTML =
       "Tap every " + CATEGORY_WORDS[state.targetTag] + "!" +
       '<span id="prompt-sub">Ketuk semua ' + CATEGORY_ID[state.targetTag] + "!</span>";
@@ -458,56 +549,33 @@ function startRound() {
     state.target = list[Math.floor(Math.random() * list.length)];
     state.usedWords.push(state.target.en);
     if (state.roundType === "listen") {
-      state.need = 4;
       $("prompt-text").innerHTML =
         "Listen, then tap the word you hear!" +
         '<span id="prompt-sub">Dengarkan, lalu ketuk katanya!</span>';
-      speak(state.target.en);
     } else if (state.roundType === "picture") {
-      state.need = 5;
       $("prompt-text").innerHTML =
         "Tap the picture of: <b>" + state.target.en + "</b>" +
         '<span id="prompt-sub">Ketuk gambarnya!</span>';
-      speak(state.target.en);
     } else {
-      state.need = 4;
       $("prompt-text").innerHTML =
         fmtPic(state.target.pic, false) +
         '<span id="prompt-sub">Ketuk kata: ' + state.target.id + " (tap the English word)</span>";
-      speak(state.target.en);
     }
+    speak(state.target.en);
   }
-  state.hits = 0;
-  state.totalNeed += state.need;
-  state.timeLeft = state.roundTime;
-  state.spawnTimer = 0;
-  state.running = true;
-  flash("Round " + state.round, 600);
-  updateHud();
-}
-
-function endRound() {
-  if (!state.running) return;
-  state.running = false;
-  clearItems();
-  sfx.chime();
-  const perfect = state.hits >= state.need && state.wrongs === 0;
-  flash(perfect ? "Perfect!" : state.hits >= state.need ? "Bagus!" : "Waktu habis!", 900);
-  setTimeout(() => {
-    if (state.round >= state.totalRounds) endGame();
-    else startRound();
-  }, 1000);
 }
 
 function endGame() {
-  const ratio = state.totalNeed > 0 ? state.totalHits / state.totalNeed : 0;
-  const stars = ratio >= 0.85 ? 3 : ratio >= 0.55 ? 2 : 1;
+  state.running = false;
+  clearItems();
+  const stars = state.score >= CONFIG.starHigh ? 3 : state.score >= CONFIG.starMid ? 2 : 1;
   $("stars").innerHTML = "\u2605".repeat(stars) + "\u2606".repeat(3 - stars);
   $("result-score").textContent = state.score;
   $("best-streak").textContent = state.bestStreak;
+  $("time-survived").textContent = fmtTime(state.timeSurvived);
   $("result-label").textContent = state.score > 0
     ? "Alhamdulillah, selesai!"
-    : state.score < 0 ? "Terus berlatih, ya!" : "Coba lagi, ya!";
+    : "Coba lagi, ya!";
   show("result");
   sfx.chime();
   confetti();
@@ -518,14 +586,18 @@ function startGame() {
   state.score = 0;
   state.streak = 0;
   state.bestStreak = 0;
-  state.round = 0;
-  state.totalNeed = 0;
-  state.totalHits = 0;
-  state.wrongs = 0;
+  state.lives = CONFIG.maxLives;
+  state.level = 1;
+  state.levelTimer = CONFIG.levelSeconds;
+  state.spawnTimer = 0;
+  state.timeSurvived = 0;
   state.usedWords = [];
+  clearItems();
   show("game");
   sfx.start();
-  startRound();
+  waveUpdate();
+  flash("Level 1", 700);
+  updateHud();
 }
 
 function loop(t) {
@@ -533,31 +605,45 @@ function loop(t) {
   const dt = Math.min(50, t - state.lastT) / 1000;
   state.lastT = t;
   if (state.running) {
-    state.timeLeft -= dt;
+    state.timeSurvived += dt;
+    $("time-val").textContent = fmtTime(state.timeSurvived);
+    state.levelTimer -= dt;
     $("timer-fill").style.width =
-      Math.max(0, (state.timeLeft / state.roundTime) * 100) + "%";
-    $("timerbar").classList.toggle("low", state.timeLeft < 8 && state.timeLeft > 0);
-    if (state.timeLeft <= 0) {
-      endRound();
-    } else {
-      state.spawnTimer -= dt;
-      if (state.spawnTimer <= 0 && state.items.length < 6) {
-        spawnItem();
-        state.spawnTimer = 0.9 - Math.min(0.35, state.round * 0.06);
-      }
-      const h = sky.clientHeight;
-      for (const item of state.items) {
-        if (item.dead) continue;
-        item.y += item.speed * dt;
-        item.el.style.transform =
-          "translate(" + item.x + "px, " + item.y + "px)";
-        if (item.y > h + 20) {
-          item.dead = true;
-          item.el.remove();
+      Math.max(0, (state.levelTimer / CONFIG.levelSeconds) * 100) + "%";
+    if (state.levelTimer <= 0) {
+      state.level++;
+      state.levelTimer += CONFIG.levelSeconds;
+      waveUpdate();
+      flash("Level " + state.level, 700);
+      sfx.chime();
+    }
+    state.spawnTimer -= dt;
+    const cap = Math.min(CONFIG.maxCap,
+      CONFIG.baseCap + Math.floor((state.level - 1) * CONFIG.capPerLevel));
+    const interval = Math.max(CONFIG.spawnFloor,
+      CONFIG.baseSpawn - (state.level - 1) * CONFIG.spawnDropPerLevel);
+    if (state.spawnTimer <= 0 && state.items.length < cap) {
+      spawnItem();
+      state.spawnTimer = interval;
+    }
+    const h = sky.clientHeight;
+    for (const item of state.items) {
+      if (item.dead) continue;
+      item.y += item.speed * dt;
+      item.el.style.transform =
+        "translate(" + item.x + "px, " + item.y + "px)";
+      if (item.y > h + 20) {
+        item.dead = true;
+        item.el.remove();
+        if (item.kind === "mutant" && Math.random() < CONFIG.mutantFallRisk) {
+          floatText("-1 \u2665", item.x, h - 60, true);
+          sfx.hurt();
+          loseLife();
+          if (!state.running) break;
         }
       }
-      state.items = state.items.filter((it) => !it.dead);
     }
+    state.items = state.items.filter((it) => !it.dead);
   }
   requestAnimationFrame(loop);
 }
