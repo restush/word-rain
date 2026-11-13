@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Rain: Layer Tuner</title>
+<style>
+  :root{--cream:#FDF6E3;--teal:#1A535C;--sun:#FFD166;--bad:#9E1420}
+  *{box-sizing:border-box}
+  body{margin:0;height:100vh;display:flex;background:var(--cream);color:var(--teal);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;overflow:hidden}
+  #left{flex:1;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+  #stage-wrap{position:relative}
+  #stage{position:relative;width:1024px;height:1024px;transform-origin:top left;
+    background:#20343c;border:3px solid var(--teal);border-radius:8px}
+  #stage img.layer{position:absolute;user-select:none;-webkit-user-drag:none;cursor:move}
+  #stage img.layer.sel{outline:3px dashed var(--sun);outline-offset:2px}
+  #right{width:330px;background:#fff;border-left:3px solid var(--teal);padding:12px;overflow:auto;font-size:13px}
+  h2{font-size:14px;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px}
+  .row{display:flex;gap:6px;align-items:center;margin:5px 0}
+  label{width:58px;font-weight:bold}
+  input[type=number]{width:72px;padding:5px;border:2px solid var(--teal);border-radius:8px;font-size:13px}
+  input[type=range]{flex:1}
+  button{background:var(--teal);color:var(--cream);border:0;border-radius:10px;
+    padding:8px 11px;font-weight:bold;cursor:pointer;font-family:inherit}
+  button.alt{background:#fff;color:var(--teal);border:2px solid var(--teal)}
+  button:hover{filter:brightness(1.12)}
+  :focus-visible{outline:3px solid var(--bad);outline-offset:2px}
+  .lay{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:8px;cursor:pointer}
+  .lay.sel{background:var(--sun)}
+  .lay .nm{flex:1;font-family:monospace;font-size:12px}
+  .lay button{padding:2px 7px;font-size:11px;border-radius:6px}
+  #coords{font-family:monospace;font-size:12px;background:var(--cream);
+    border:2px solid var(--teal);border-radius:8px;padding:6px;margin:6px 0}
+  #out{width:100%;height:130px;font-family:monospace;font-size:11px;
+    border:2px solid var(--teal);border-radius:8px;padding:6px}
+</style>
+</head>
+<body>
+<div id="left"><div id="stage-wrap"><div id="stage"></div></div></div>
+<div id="right">
+  <h2>Word Rain: Layer Tuner</h2>
+  <p>Pilih layer di daftar, lalu drag di gambar. Panah keyboard geser 1px (Shift = 10px). Rotate dan Flip untuk perbaiki miring.</p>
+  <div class="row"><label>Zoom</label><input type="range" id="zoom" min="20" max="100" value="52"></div>
+  <div id="coords">pilih layer dulu</div>
+  <h2>Selected layer</h2>
+  <div class="row"><label>X</label><input type="number" id="px"><label>Y</label><input type="number" id="py"></div>
+  <div class="row"><label>Width</label><input type="number" id="pw"></div>
+  <div class="row"><label>Rotate</label><input type="range" id="prot" min="-25" max="25" step="0.5" value="0"><span id="protv">0</span></div>
+  <div class="row">
+    <button class="alt" id="flip">Flip</button>
+    <button class="alt" id="zup">Z up</button>
+    <button class="alt" id="zdown">Z down</button>
+  </div>
+  <h2>Layers (top = front)</h2>
+  <div id="list"></div>
+  <h2>Output for the assistant</h2>
+  <textarea id="out" readonly></textarea>
+  <div class="row">
+    <button id="copy">Copy JSON</button>
+    <button class="alt" id="save">Download slots.json</button>
+    <button class="alt" id="reset">Reset</button>
+  </div>
+</div>
+<script>
+const ASSET = "../assets/";
+const INIT = [
+  ["wall-paint",35,40,954],["floor-tiles",66,453,892],
+  ["old-window",110,240,125],["blackboard",598,270,277],["old-fan",415,135,100],
+  ["clock",705,150,60],["map",255,255,140],["bookshelf",240,435,175],
+  ["desks",255,525,490],["teacher-desk",580,500,175],["rugs",785,545,130],["plant",85,605,105],
+  ["fix-window",110,240,125],["whiteboard",598,270,277],["ac",395,110,150],
+  ["poster-map",255,255,140],["bookshelf-new",240,435,175],["rugs-new",785,545,130],
+  ["plants-new",85,605,105],["curtains",105,225,135],
+  ["tv",620,130,240],["kaligrafi",595,145,100],["flag",880,150,85],
+  ["poster-english",115,500,115],["papan-karya",880,300,85]
+];
+function $(id){ return document.getElementById(id); }
+const stage = document.getElementById("stage");
+const layers = [];
+let sel = null;
+
+const shell = document.createElement("img");
+shell.src = ASSET + "shell.png";
+shell.style.cssText = "position:absolute;left:0;top:0;width:1024px";
+stage.appendChild(shell);
+
+function place(st){
+  st.el.style.left = st.x + "px";
+  st.el.style.top = st.y + "px";
+  st.el.style.width = st.w + "px";
+  st.el.style.transform = "rotate(" + st.rot + "deg)" + (st.flip ? " scaleX(-1)" : "");
+  st.el.style.display = st.visible ? "" : "none";
+}
+function reorder(){ layers.forEach((st) => stage.appendChild(st.el)); }
+function sync(){
+  if (sel){
+    $("px").value = sel.x; $("py").value = sel.y; $("pw").value = sel.w;
+    $("prot").value = sel.rot; $("protv").textContent = sel.rot;
+    $("coords").textContent = sel.name + "   x:" + sel.x + "  y:" + sel.y +
+      "  w:" + sel.w + "  rot:" + sel.rot + (sel.flip ? "  flipped" : "");
+  }
+  const out = {};
+  layers.forEach((st) => {
+    out[st.name] = {x: st.x, y: st.y, w: st.w, rot: st.rot, flip: st.flip, visible: st.visible};
+  });
+  $("out").value = JSON.stringify(out, null, 1);
+}
+function select(st){
+  sel = st;
+  layers.forEach((s) => s.el.classList.toggle("sel", s === sel));
+  Array.prototype.forEach.call(document.querySelectorAll(".lay"), (r, i) =>
+    r.classList.toggle("sel", layers[layers.length - 1 - i] === sel));
+  sync();
+}
+function buildList(){
+  const list = $("list");
+  list.innerHTML = "";
+  layers.slice().reverse().forEach((st) => {
+    const row = document.createElement("div");
+    row.className = "lay";
+    const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = st.visible;
+    cb.addEventListener("change", () => { st.visible = cb.checked; place(st); sync(); });
+    const nm = document.createElement("span");
+    nm.className = "nm"; nm.textContent = st.name;
+    const up = document.createElement("button");
+    up.textContent = "+"; up.title = "bring forward";
+    up.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, 1); });
+    const dn = document.createElement("button");
+    dn.textContent = "-"; dn.title = "send backward";
+    dn.addEventListener("click", (e) => { e.stopPropagation(); moveZ(st, -1); });
+    row.append(cb, nm, up, dn);
+    row.addEventListener("click", () => select(st));
+    list.appendChild(row);
+  });
+}
+function moveZ(st, dir){
+  const i = layers.indexOf(st);
+  const j = i + dir;
+  if (j < 0 || j >= layers.length) return;
+  layers.splice(i, 1); layers.splice(j, 0, st);
+  reorder(); buildList(); select(st);
+}
+function startDrag(e, st){
+  select(st);
+  const z = zoom();
+  const sx = e.clientX, sy = e.clientY, ox = st.x, oy = st.y;
+  function mv(ev){
+    st.x = Math.round(ox + (ev.clientX - sx) / z);
+    st.y = Math.round(oy + (ev.clientY - sy) / z);
+    place(st); sync();
+  }
+  function up(){
+    window.removeEventListener("pointermove", mv);
+    window.removeEventListener("pointerup", up);
+  }
+  window.addEventListener("pointermove", mv);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+}
+function zoom(){ return parseFloat($("zoom").value) / 100; }
+function applyZoom(){
+  const z = zoom();
+  stage.style.transform = "scale(" + z + ")";
+  $("stage-wrap").style.width = 1024 * z + "px";
+  $("stage-wrap").style.height = 1024 * z + "px";
+}
+function init(){
+  INIT.forEach((row) => {
+    const name = row[0];
+    const img = document.createElement("img");
+    img.className = "layer";
+    img.src = ASSET + name + "-cut.png";
+    const st = {name: name, x: row[1], y: row[2], w: row[3], rot: 0, flip: false, visible: true, el: img};
+    img.addEventListener("pointerdown", (e) => startDrag(e, st));
+    stage.appendChild(img);
+    layers.push(st);
+    place(st);
+  });
+  buildList();
+  applyZoom();
+  sync();
+}
+$("zoom").addEventListener("input", applyZoom);
+["px", "py", "pw"].forEach((id) => $(id).addEventListener("input", () => {
+  if (!sel) return;
+  sel.x = parseInt($("px").value) || 0;
+  sel.y = parseInt($("py").value) || 0;
+  sel.w = Math.max(10, parseInt($("pw").value) || 10);
+  place(sel); sync();
+}));
+$("prot").addEventListener("input", () => {
+  if (!sel) return;
+  sel.rot = parseFloat($("prot").value);
+  place(sel); sync();
+});
+$("flip").addEventListener("click", () => {
+  if (!sel) return;
+  sel.flip = !sel.flip; place(sel); sync();
+});
+$("zup").addEventListener("click", () => { if (sel) moveZ(sel, 1); });
+$("zdown").addEventListener("click", () => { if (sel) moveZ(sel, -1); });
+$("copy").addEventListener("click", () => {
+  const t = $("out");
+  t.select();
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value);
+  $("copy").textContent = "Copied!";
+  setTimeout(() => { $("copy").textContent = "Copy JSON"; }, 1200);
+});
+$("save").addEventListener("click", () => {
+  const blob = new Blob([$("out").value], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "slots.json";
+  a.click();
+});
+$("reset").addEventListener("click", () => location.reload());
+document.addEventListener("keydown", (e) => {
+  if (!sel) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+  const step = e.shiftKey ? 10 : 1;
+  if (e.key === "ArrowLeft") sel.x -= step;
+  else if (e.key === "ArrowRight") sel.x += step;
+  else if (e.key === "ArrowUp") sel.y -= step;
+  else if (e.key === "ArrowDown") sel.y += step;
+  else return;
+  e.preventDefault();
+  place(sel); sync();
+});
+init();
+</script>
+</body>
+</html>
