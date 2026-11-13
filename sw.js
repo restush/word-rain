@@ -1,4 +1,4 @@
-const CACHE = "temp-v1";
+const CACHE = "temp-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -34,7 +34,7 @@ self.addEventListener("fetch", (e) => {
   if (req.mode === "navigate") {
     // network first: updates land when online, cache keeps it playable offline
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: "no-cache" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(req, copy));
