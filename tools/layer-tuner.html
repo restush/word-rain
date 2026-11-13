@@ -63,6 +63,9 @@
   </div>
   <h2>Layers (grouped, top = front)</h2>
   <div id="list"></div>
+  <h2>Input JSON (paste di sini, lalu Apply)</h2>
+  <textarea id="in" placeholder="paste JSON"></textarea>
+  <div class="row"><button id="apply">Apply JSON</button></div>
   <h2>Output for the assistant</h2>
   <textarea id="out" readonly></textarea>
   <div class="row">
@@ -74,6 +77,7 @@
 <script>
 const ASSET = "../assets/";
 const INIT = [
+  ["old-wall",34,40,956,"before"],["old-floor",66,452,892,"before"],
   ["wall-paint",35,40,954,"after"],["floor-tiles",66,453,892,"after"],
   ["old-window",110,240,125,"before"],["blackboard",598,270,277,"before"],["old-fan",415,135,100,"before"],
   ["clock",705,150,60,"before"],["map",255,255,140,"before"],["bookshelf",240,435,175,"before"],
@@ -91,7 +95,7 @@ const layers = [];
 let sel = null;
 
 const shell = document.createElement("img");
-shell.src = ASSET + "shell.png";
+shell.src = ASSET + "shell-base-cut.png";
 shell.style.cssText = "position:absolute;left:0;top:0;width:1024px";
 stage.appendChild(shell);
 
@@ -275,6 +279,30 @@ $("save").addEventListener("click", () => {
   a.href = URL.createObjectURL(blob);
   a.download = "slots.json";
   a.click();
+});
+$("apply").addEventListener("click", () => {
+  let data;
+  try { data = JSON.parse($("in").value); }
+  catch (err) { $("coords").textContent = "JSON tidak valid"; return; }
+  let n = 0;
+  layers.forEach((st) => {
+    const d = data[st.name];
+    if (!d) return;
+    if (typeof d.x === "number") st.x = d.x;
+    if (typeof d.y === "number") st.y = d.y;
+    if (typeof d.w === "number") st.w = d.w;
+    if (typeof d.rot === "number") st.rot = d.rot;
+    if (typeof d.skx === "number") st.skx = d.skx;
+    if (typeof d.sky === "number") st.sky = d.sky;
+    if (typeof d.scx === "number") st.scx = d.scx;
+    if (typeof d.scy === "number") st.scy = d.scy;
+    if (typeof d.flip === "boolean") st.flip = d.flip;
+    if (typeof d.visible === "boolean") st.visible = d.visible;
+    place(st);
+    n++;
+  });
+  buildList(); sync();
+  $("coords").textContent = "Applied " + n + " layers";
 });
 $("reset").addEventListener("click", () => location.reload());
 document.addEventListener("keydown", (e) => {

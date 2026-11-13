@@ -39,6 +39,8 @@ SLOTS = {
     "plants-new":   (85, 605, 190, 725),
     "bookshelf-new": (240, 435, 415, 620),
     "rugs-new":     (785, 545, 915, 675),
+    "wall-paint":   (35, 40, 989, 692),
+    "floor-tiles":  (66, 453, 958, 973),
 }
 
 # layers drawn over the shell in this order (back to front)
@@ -50,6 +52,7 @@ ORDER = [
 BIG = ["wall-paint", "floor-tiles"]  # pasted unscaled at crop origin
 
 FINAL = [
+    "wall-paint", "floor-tiles",
     "fix-window", "whiteboard", "ac", "poster-map", "bookshelf-new",
     "desks", "teacher-desk", "rugs-new", "plants-new", "curtains",
     "tv", "kaligrafi", "flag", "poster-english", "papan-karya",
@@ -85,14 +88,6 @@ def main():
         bg = sys.argv[2] if len(sys.argv) > 2 else "shell.png"
         base = Image.open(ASSETS / bg).convert("RGBA")
         names = FINAL if mode == "final" else ORDER
-        if mode == "final":
-            for name in BIG:
-                cut = ASSETS / (name + "-cut.png")
-                if cut.exists():
-                    s = Image.open(cut).convert("RGBA")
-                    bb = s.split()[3].getbbox()
-                    base.alpha_composite(s.crop(bb), (bb[0], bb[1]))
-                    print(name, "-> big paste at", (bb[0], bb[1]))
         for name in names:
             cut = ASSETS / (name + "-cut.png")
             if not cut.exists():

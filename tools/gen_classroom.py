@@ -216,6 +216,28 @@ PROMPTS = {
         "Isolated on a plain pure white background. No floor, no wall, no room, nothing "
         "else. " + STYLE
     ),
+    "shell-base": (
+        "Using the attached classroom as exact reference for geometry, size and "
+        "perspective: the SAME isometric room box STRUCTURE ONLY, with completely plain "
+        "neutral gray walls and a plain neutral gray floor. No paint texture, no peeling, "
+        "no tiles, no scuffs, no objects, no window, nothing on the surfaces. Only the "
+        "room box structure: wall corner, top rim, floor rim, clean thick outlines. "
+        "16-bit pixel art, no text, no people, no watermark. Isolated on a plain pure "
+        "white background."
+    ),
+    "old-wall": (
+        "Using the attached classroom image ONLY as reference for exact geometry and size: "
+        "the OLD wall surfaces exactly as in the reference: the two back wall faces with "
+        "peeling cream paint patches and bare nail holes, same shape and position. "
+        "Isolated on a plain pure white background. Only the wall surfaces: no floor, no "
+        "rim, no objects, nothing else. " + STYLE
+    ),
+    "old-floor": (
+        "Using the attached classroom image ONLY as reference for exact geometry and size: "
+        "the OLD floor surface exactly as in the reference: the diamond floor with scuffed "
+        "worn teal grid tiles, same shape and position. Isolated on a plain pure white "
+        "background. Only the floor surface: no walls, no rim, no objects, nothing else. " + STYLE
+    ),
 }
 
 
