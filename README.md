@@ -10,8 +10,9 @@ Made for SDIT Baitussalam 2 Cangkringan (Fase B, English).
 - Pick a pack (Animals / Colors / Food / School / Mixed), press **Start Word Rain**.
 - Tap the correct falling words. Correct = +10, wrong = -5.
 - The energy bar drains over time and refills on correct taps. Empty bar = run over.
-- 3 lives. Mutation cards (skull) cost a life when tapped, and might when they fall.
-  Heart cards refill a life (only appear when lives < 3).
+- 3 lives. Cards sometimes MUTATE into red skull cards mid-fall (only while high on
+  screen, so you always get reaction time): you must tap them to defuse (+5), or they
+  cost a life when they fall. Heart cards refill a life (only appear when lives < 3).
 - Round types rotate: picture prompt, category rush, listen and tap, picture match.
 - Score becomes coins: floor(score / 20) + 5 per level.
 
