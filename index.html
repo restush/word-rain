@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-:root{--cream:#FDF6E3;--teal:#1A535C;--sun:#FFD166;--coral:#FF6B6B;--mint:#4ECDC4}
+:root{--cream:#FDF6E3;--teal:#1A535C;--sun:#FFD166;--coral:#FF6B6B;--mint:#4ECDC4;--bad:#9E1420}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:var(--cream);color:var(--teal);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
@@ -27,11 +27,11 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .btn.alt{background:#fff;color:var(--teal);border:3px solid var(--teal);box-shadow:0 4px 0 var(--teal)}
 :focus-visible{outline:3px solid var(--teal);outline-offset:3px}
 .hint{font-size:14px;line-height:1.5;max-width:310px}
-.credit{font-size:12px;opacity:.75}
+.credit{font-size:12px;color:#3C6B70}
 #screen-game{justify-content:flex-start;gap:10px;padding:14px}
 #topbar{display:flex;gap:8px;width:100%}
 .pill{flex:1;background:#fff;border:3px solid var(--teal);border-radius:12px;padding:6px 4px;font-size:12px;font-weight:bold;display:flex;flex-direction:column;gap:1px}
-.pill b{font-size:19px}
+.pill b{font-size:19px;display:inline-block}
 #prompt{width:100%;background:var(--sun);border:3px solid var(--teal);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;text-align:left}
 #prompt-text{flex:1;font-size:18px;font-weight:bold;line-height:1.3}
 #prompt-sub{display:block;font-size:13px;font-weight:normal}
@@ -39,10 +39,13 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 #timerbar{width:100%;height:10px;background:#fff;border:2px solid var(--teal);border-radius:8px;overflow:hidden}
 #timerbar i{display:block;height:100%;width:100%;background:var(--teal);border-radius:6px}
 #sky{position:relative;flex:1;width:100%;overflow:hidden;border:3px solid var(--teal);border-radius:18px;background:linear-gradient(180deg,#DFF3F1,var(--cream))}
-.card{position:absolute;top:0;left:0;width:92px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:8px 5px;touch-action:manipulation;will-change:transform}
-.card .pic{font-size:30px;line-height:1}
-.card .sw{width:30px;height:30px;border-radius:8px;border:2px solid var(--teal)}
-.card .word{font-size:15px;font-weight:bold}
+.card{position:absolute;top:0;left:0;touch-action:manipulation;will-change:transform;padding:0;background:none;border:0}
+.card-inner{display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:8px 5px;width:92px}
+.card-inner .pic{font-size:30px;line-height:1}
+.card-inner .pic.big{font-size:46px}
+.card-inner .sw{width:30px;height:30px;border-radius:8px;border:2px solid var(--teal)}
+.card-inner .sw.big{width:46px;height:46px}
+.card-inner .word{font-size:15px;font-weight:bold}
 @keyframes pop{40%{transform:scale(1.15)}100%{opacity:0}}
 .pop{animation:pop .32s ease-out forwards;pointer-events:none}
 @keyframes shake{20%{margin-left:-6px}40%{margin-left:6px}60%{margin-left:-4px}80%{margin-left:4px}}
@@ -50,6 +53,25 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 @keyframes floatup{to{transform:translateY(-46px);opacity:0}}
 .float{position:absolute;font-size:20px;font-weight:bold;color:var(--teal);background:var(--sun);border:2px solid var(--teal);border-radius:10px;padding:2px 10px;animation:floatup .8s ease-out forwards;pointer-events:none;z-index:4}
 #flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;background:rgba(253,246,227,.92);z-index:5;text-align:center;padding:20px;line-height:1.4}
+@keyframes ringfly{to{transform:scale(2.4);opacity:0}}
+.ring{position:absolute;width:60px;height:60px;border:4px solid var(--teal);border-radius:50%;animation:ringfly .45s ease-out forwards;pointer-events:none;z-index:3}
+@keyframes wrongpop{25%{transform:scale(1.12) rotate(-7deg)}60%{transform:scale(.55) rotate(9deg);opacity:.5}100%{transform:scale(.15);opacity:0}}
+.wrongpop{animation:wrongpop .45s ease-in forwards;border-color:var(--bad)}
+@keyframes screenshake{20%{transform:translateX(-6px)}45%{transform:translateX(6px)}70%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+.shake-it{animation:screenshake .32s}
+@keyframes punch{45%{transform:scale(1.35)}}
+.punch{animation:punch .3s}
+.neg{color:var(--bad)}
+.pill.hot{background:var(--sun)}
+@keyframes pulsebar{50%{transform:scaleY(1.6)}}
+#timerbar.low{border-color:var(--bad)}
+#timerbar.low i{animation:pulsebar .7s infinite}
+.float.bad{color:var(--bad);background:#fff;border-color:var(--bad)}
+@keyframes confettifall{to{transform:translateY(110vh) rotate(320deg);opacity:.2}}
+.confetti{position:absolute;top:-16px;width:10px;height:16px;border-radius:3px;animation:confettifall 2.4s linear forwards;pointer-events:none;z-index:6}
+.btn:hover{filter:brightness(1.1)}
+.pack-btn:hover{background:#FFF3CF}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}.confetti,.ring,.float{display:none}}
 #result-score{font-size:clamp(52px,17vw,76px);line-height:1}
 .stars{font-size:42px;letter-spacing:8px;color:var(--teal)}
 .ayat{background:#fff;border:3px solid var(--teal);border-radius:16px;padding:14px 16px;max-width:330px;line-height:1.5}
@@ -69,6 +91,8 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
     <div class="packs" id="packs" role="group" aria-label="Pilih tema">
       <button class="pack-btn" data-pack="animals" aria-pressed="false">Animals</button>
       <button class="pack-btn" data-pack="colors" aria-pressed="false">Colors</button>
+      <button class="pack-btn" data-pack="food" aria-pressed="false">Food</button>
+      <button class="pack-btn" data-pack="school" aria-pressed="false">School</button>
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
     <button class="btn" id="start-btn">MULAI MAIN</button>
@@ -134,48 +158,85 @@ const CONTENT = {
     {en:"white",id:"putih",pic:"#FFFFFF",tag:"color"},
     {en:"brown",id:"cokelat",pic:"#8B5A2B",tag:"color"},
     {en:"pink",id:"pink",pic:"#F06595",tag:"color"}
+  ],
+  food: [
+    {en:"rice",id:"nasi",pic:"🍚",tag:"food"},
+    {en:"water",id:"air",pic:"💧",tag:"food"},
+    {en:"bread",id:"roti",pic:"🍞",tag:"food"},
+    {en:"egg",id:"telur",pic:"🥚",tag:"food"},
+    {en:"milk",id:"susu",pic:"🥛",tag:"food"},
+    {en:"chicken",id:"ayam",pic:"🍗",tag:"food"},
+    {en:"apple",id:"apel",pic:"🍎",tag:"food"},
+    {en:"banana",id:"pisang",pic:"🍌",tag:"food"},
+    {en:"cake",id:"kue",pic:"🍰",tag:"food"},
+    {en:"noodles",id:"mie",pic:"🍜",tag:"food"}
+  ],
+  school: [
+    {en:"book",id:"buku",pic:"📖",tag:"school"},
+    {en:"pencil",id:"pensil",pic:"✏️",tag:"school"},
+    {en:"ruler",id:"penggaris",pic:"📏",tag:"school"},
+    {en:"bag",id:"tas",pic:"🎒",tag:"school"},
+    {en:"teacher",id:"guru",pic:"👩‍🏫",tag:"school"},
+    {en:"notebook",id:"buku tulis",pic:"📓",tag:"school"},
+    {en:"scissors",id:"gunting",pic:"✂️",tag:"school"},
+    {en:"crayon",id:"krayon",pic:"🖍️",tag:"school"},
+    {en:"school",id:"sekolah",pic:"🏫",tag:"school"},
+    {en:"clock",id:"jam",pic:"⏰",tag:"school"}
   ]
 };
-const CATEGORY_WORDS = {animal:"animal",color:"color"};
-const CATEGORY_ID = {animal:"hewan",color:"warna"};
+const CATEGORY_WORDS = {animal:"animal",color:"color",food:"food",school:"school"};
+const CATEGORY_ID = {animal:"hewan",color:"warna",food:"makanan",school:"alat sekolah"};
+const ROUND_PLAN = ["word", "category", "listen", "picture", "word", "category"];
 /* --- engine --- */
+
+
 
 
 /* --- engine: teachers do not edit below --- */
 const $ = (id) => document.getElementById(id);
 const screens = {title: $("screen-title"), game: $("screen-game"), result: $("screen-result")};
 const sky = $("sky");
-const fmt = (pic) => pic.charAt(0) === "#"
-  ? '<span class="sw" style="background:' + pic + '"></span>'
-  : '<span class="pic">' + pic + "</span>";
+const TTS = "speechSynthesis" in window;
+const fmtPic = (pic, big) => pic.charAt(0) === "#"
+  ? '<span class="sw' + (big ? " big" : "") + '" style="background:' + pic + '"></span>'
+  : '<span class="pic' + (big ? " big" : "") + '">' + pic + "</span>";
+
+const PACK_TAGS = {
+  animals: ["animal"],
+  colors: ["color"],
+  food: ["food"],
+  school: ["school"],
+  mixed: ["animal", "color", "food", "school"]
+};
 
 const state = {
   pack: "mixed",
-  running: false,
-  round: 0,
-  totalRounds: 5,
   roundType: "word",
   target: null,
   targetTag: null,
   need: 0,
   hits: 0,
+  wrongs: 0,
   totalHits: 0,
   totalNeed: 0,
   score: 0,
   streak: 0,
   bestStreak: 0,
+  round: 0,
+  totalRounds: ROUND_PLAN.length,
   timeLeft: 0,
   roundTime: 35,
   spawnTimer: 0,
+  running: false,
   items: [],
-  lastT: 0
+  lastT: 0,
+  usedWords: []
 };
 
 function pool() {
-  const tags = state.pack === "mixed"
-    ? ["animal", "color"]
-    : [state.pack === "animals" ? "animal" : "color"];
-  return CONTENT.animals.concat(CONTENT.colors).filter((w) => tags.indexOf(w.tag) >= 0);
+  const tags = PACK_TAGS[state.pack] || PACK_TAGS.mixed;
+  return CONTENT.animals.concat(CONTENT.colors, CONTENT.food, CONTENT.school)
+    .filter((w) => tags.indexOf(w.tag) >= 0);
 }
 
 function show(name) {
@@ -212,7 +273,7 @@ function tone(freq, dur, type, vol, slide) {
 }
 const sfx = {
   pop: () => tone(660, 0.12, "sine", 0.25, 990),
-  buzz: () => tone(180, 0.18, "square", 0.12),
+  buzz: () => { tone(190, 0.16, "square", 0.12); tone(140, 0.2, "square", 0.1, 90); },
   chime: () => {
     tone(523, 0.18, "triangle", 0.2);
     setTimeout(() => tone(659, 0.18, "triangle", 0.2), 120);
@@ -226,7 +287,7 @@ const sfx = {
 
 /* Optional pronunciation via the phone's own voice */
 function speak(text) {
-  if (!("speechSynthesis" in window)) return;
+  if (!TTS) return;
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -235,12 +296,18 @@ function speak(text) {
     window.speechSynthesis.speak(u);
   } catch (e) {}
 }
-if (!("speechSynthesis" in window)) $("speak-btn").style.display = "none";
+if (!TTS) $("speak-btn").style.display = "none";
 
 function updateHud() {
-  $("score-val").textContent = state.score;
+  const scoreEl = $("score-val");
+  scoreEl.textContent = state.score;
+  scoreEl.classList.toggle("neg", state.score < 0);
+  scoreEl.classList.remove("punch");
+  void scoreEl.offsetWidth;
+  scoreEl.classList.add("punch");
   $("round-val").textContent = state.round + "/" + state.totalRounds;
   $("streak-val").textContent = state.streak;
+  $("streak-val").parentElement.classList.toggle("hot", state.streak >= 3);
 }
 
 function flash(text, ms) {
@@ -254,9 +321,9 @@ function flash(text, ms) {
   setTimeout(() => f.remove(), ms);
 }
 
-function floatText(text, x, y) {
+function floatText(text, x, y, bad) {
   const f = document.createElement("div");
-  f.className = "float";
+  f.className = "float" + (bad ? " bad" : "");
   f.textContent = text;
   f.style.left = Math.max(4, x - 20) + "px";
   f.style.top = Math.max(4, y - 30) + "px";
@@ -264,36 +331,67 @@ function floatText(text, x, y) {
   setTimeout(() => f.remove(), 850);
 }
 
+function ring(x, y) {
+  const r = document.createElement("div");
+  r.className = "ring";
+  r.style.left = (x - 30) + "px";
+  r.style.top = (y - 30) + "px";
+  sky.appendChild(r);
+  setTimeout(() => r.remove(), 500);
+}
+
+function confetti() {
+  const colors = ["#FFD166", "#4ECDC4", "#FF6B6B", "#1A535C"];
+  for (let i = 0; i < 18; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colors[i % colors.length];
+    c.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
+    c.style.animationDuration = (1.8 + Math.random() * 1.6).toFixed(2) + "s";
+    screens.result.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+}
+
 function clearItems() {
   state.items.forEach((it) => it.el.remove());
   state.items = [];
 }
 
+
 function spawnItem() {
   const list = pool();
   let data;
-  if (state.roundType === "word" && Math.random() < 0.42) {
+  const r = Math.random();
+  const single = state.roundType !== "category";
+  if (single && r < 0.42) {
     data = state.target;
+  } else if (state.roundType === "category" && r < 0.5) {
+    const t = list.filter((w) => w.tag === state.targetTag);
+    data = t[Math.floor(Math.random() * t.length)];
   } else {
     data = list[Math.floor(Math.random() * list.length)];
   }
   const el = document.createElement("button");
   el.className = "card";
   el.type = "button";
-  el.innerHTML = state.roundType === "word"
-    ? '<span class="word">' + data.en + "</span>"
-    : fmt(data.pic) + '<span class="word">' + data.en + "</span>";
+  const inner = document.createElement("span");
+  inner.className = "card-inner";
+  if (state.roundType === "word" || state.roundType === "listen") {
+    inner.innerHTML = '<span class="word">' + data.en + "</span>";
+  } else if (state.roundType === "picture") {
+    inner.innerHTML = fmtPic(data.pic, true);
+  } else {
+    inner.innerHTML = fmtPic(data.pic, false) + '<span class="word">' + data.en + "</span>";
+  }
+  inner.style.transform = "rotate(" + (Math.random() * 8 - 4).toFixed(1) + "deg)";
+  el.appendChild(inner);
   el.setAttribute("aria-label", data.en);
   const maxX = sky.clientWidth - 106;
   const x = 6 + Math.random() * Math.max(6, maxX);
-  const item = {
-    el: el,
-    data: data,
-    x: x,
-    y: -110,
-    speed: 55 + Math.random() * 35 + state.round * 8,
-    dead: false
-  };
+  const item = {el: el, inner: inner, data: data, x: x, y: -110,
+    speed: 55 + Math.random() * 35 + state.round * 8, dead: false};
   el.style.transform = "translate(" + x + "px, -110px)";
   el.addEventListener("pointerdown", (e) => { e.preventDefault(); tapItem(item); });
   el.addEventListener("keydown", (e) => {
@@ -305,44 +403,49 @@ function spawnItem() {
 
 function tapItem(item) {
   if (!state.running || item.dead) return;
-  const ok = state.roundType === "word"
-    ? item.data.en === state.target.en
-    : item.data.tag === state.targetTag;
+  const ok = state.roundType === "category"
+    ? item.data.tag === state.targetTag
+    : item.data.en === state.target.en;
+  item.dead = true;
   if (ok) {
-    item.dead = true;
     state.hits++;
     state.totalHits++;
     state.streak++;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
     state.score += 10;
     sfx.pop();
-    item.el.classList.add("pop");
-    floatText("+10", item.x, item.y);
-    if (state.streak === 3) floatText("Great!", item.x, item.y);
-    if (state.streak === 5) floatText("Amazing!", item.x, item.y);
-    if (state.streak === 8) floatText("MasyaAllah!", item.x, item.y);
-    setTimeout(() => item.el.remove(), 340);
-    updateHud();
-    if (state.hits >= state.need) endRound();
+    ring(item.x + 46, item.y + 30);
+    item.inner.classList.add("pop");
+    floatText("+10", item.x, item.y, false);
+    if (state.streak === 3) floatText("Great!", item.x, item.y - 34, false);
+    if (state.streak === 5) floatText("Amazing!", item.x, item.y - 34, false);
+    if (state.streak === 8) floatText("MasyaAllah!", item.x, item.y - 34, false);
+    setTimeout(() => item.el.remove(), 360);
   } else {
+    state.wrongs++;
     state.streak = 0;
+    state.score -= 5;
     sfx.buzz();
-    item.el.classList.remove("shake");
-    void item.el.offsetWidth;
-    item.el.classList.add("shake");
-    updateHud();
+    item.inner.classList.add("wrongpop");
+    floatText("-5", item.x, item.y, true);
+    screens.game.classList.remove("shake-it");
+    void screens.game.offsetWidth;
+    screens.game.classList.add("shake-it");
+    setTimeout(() => item.el.remove(), 460);
   }
+  updateHud();
+  if (state.hits >= state.need) endRound();
 }
 
 function startRound() {
   state.round++;
   $("round-val").textContent = state.round + "/" + state.totalRounds;
   clearItems();
-  const tags = state.pack === "mixed"
-    ? ["animal", "color"]
-    : [state.pack === "animals" ? "animal" : "color"];
-  if (state.round % 2 === 0 && tags.length > 1) {
-    state.roundType = "category";
+  state.wrongs = 0;
+  const plan = ROUND_PLAN[(state.round - 1) % ROUND_PLAN.length];
+  state.roundType = plan === "listen" && !TTS ? "word" : plan;
+  const tags = PACK_TAGS[state.pack] || PACK_TAGS.mixed;
+  if (state.roundType === "category") {
     state.targetTag = tags[Math.floor(Math.random() * tags.length)];
     state.need = 8;
     $("prompt-text").innerHTML =
@@ -350,14 +453,29 @@ function startRound() {
       '<span id="prompt-sub">Ketuk semua ' + CATEGORY_ID[state.targetTag] + "!</span>";
     speak("Tap every " + CATEGORY_WORDS[state.targetTag]);
   } else {
-    state.roundType = "word";
-    const list = pool();
+    let list = pool().filter((w) => state.usedWords.indexOf(w.en) < 0);
+    if (!list.length) { state.usedWords = []; list = pool(); }
     state.target = list[Math.floor(Math.random() * list.length)];
-    state.need = 4;
-    $("prompt-text").innerHTML =
-      fmt(state.target.pic) +
-      '<span id="prompt-sub">Ketuk kata: ' + state.target.id + " (tap the English word)</span>";
-    speak(state.target.en);
+    state.usedWords.push(state.target.en);
+    if (state.roundType === "listen") {
+      state.need = 4;
+      $("prompt-text").innerHTML =
+        "Listen, then tap the word you hear!" +
+        '<span id="prompt-sub">Dengarkan, lalu ketuk katanya!</span>';
+      speak(state.target.en);
+    } else if (state.roundType === "picture") {
+      state.need = 5;
+      $("prompt-text").innerHTML =
+        "Tap the picture of: <b>" + state.target.en + "</b>" +
+        '<span id="prompt-sub">Ketuk gambarnya!</span>';
+      speak(state.target.en);
+    } else {
+      state.need = 4;
+      $("prompt-text").innerHTML =
+        fmtPic(state.target.pic, false) +
+        '<span id="prompt-sub">Ketuk kata: ' + state.target.id + " (tap the English word)</span>";
+      speak(state.target.en);
+    }
   }
   state.hits = 0;
   state.totalNeed += state.need;
@@ -373,7 +491,8 @@ function endRound() {
   state.running = false;
   clearItems();
   sfx.chime();
-  flash(state.hits >= state.need ? "Bagus!" : "Waktu habis!", 900);
+  const perfect = state.hits >= state.need && state.wrongs === 0;
+  flash(perfect ? "Perfect!" : state.hits >= state.need ? "Bagus!" : "Waktu habis!", 900);
   setTimeout(() => {
     if (state.round >= state.totalRounds) endGame();
     else startRound();
@@ -388,9 +507,10 @@ function endGame() {
   $("best-streak").textContent = state.bestStreak;
   $("result-label").textContent = state.score > 0
     ? "Alhamdulillah, selesai!"
-    : "Coba lagi, ya!";
+    : state.score < 0 ? "Terus berlatih, ya!" : "Coba lagi, ya!";
   show("result");
   sfx.chime();
+  confetti();
 }
 
 function startGame() {
@@ -401,7 +521,8 @@ function startGame() {
   state.round = 0;
   state.totalNeed = 0;
   state.totalHits = 0;
-  state.hits = 0;
+  state.wrongs = 0;
+  state.usedWords = [];
   show("game");
   sfx.start();
   startRound();
@@ -415,6 +536,7 @@ function loop(t) {
     state.timeLeft -= dt;
     $("timer-fill").style.width =
       Math.max(0, (state.timeLeft / state.roundTime) * 100) + "%";
+    $("timerbar").classList.toggle("low", state.timeLeft < 8 && state.timeLeft > 0);
     if (state.timeLeft <= 0) {
       endRound();
     } else {
@@ -447,8 +569,8 @@ $("menu-btn").addEventListener("click", () => {
   show("title");
 });
 $("speak-btn").addEventListener("click", () => {
-  if (state.roundType === "word" && state.target) speak(state.target.en);
-  else if (state.targetTag) speak("Tap every " + CATEGORY_WORDS[state.targetTag]);
+  if (state.roundType === "category" && state.targetTag) speak("Tap every " + CATEGORY_WORDS[state.targetTag]);
+  else if (state.target) speak(state.target.en);
 });
 Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"), (btn) => {
   btn.addEventListener("click", () => {
