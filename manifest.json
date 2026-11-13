@@ -1,7 +1,7 @@
 {
   "name": "Word Rain: Hujan Kata",
   "short_name": "Word Rain",
-  "description": "Game vocabulary Bahasa Inggris: tap the falling words.",
+  "description": "English vocabulary game: tap the falling words.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
