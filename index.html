@@ -72,13 +72,14 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .btn:hover{filter:brightness(1.1)}
 .pack-btn:hover{background:#FFF3CF}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}.confetti,.ring,.float{display:none}}
-@keyframes mutatefx{45%{transform:scale(1.25)}}
-.mutate{animation:mutatefx .35s}
+@keyframes mutatefx{45%{transform:scale(1.3)}}
+.mutate{animation:mutatefx .5s}
 .hearts{color:var(--bad)}
 .card-inner.must-click{background:var(--bad);border-color:#5A0A10}
 .card-inner.must-click .word{color:var(--cream)}
 .card-inner.must-not-click{background:#2B2B33;border-color:#000}
 .card-inner.must-not-click .word{color:var(--cream)}
+.card-inner.must-click .pic,.card-inner.must-not-click .pic{background:#fff;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid #2B2B33}
 .card-inner.buff{background:var(--sun)}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
@@ -131,7 +132,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="school" aria-pressed="false">School</button>
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
-    <p class="hint"><b>Ketuk kata yang tepat saat jatuh dari atas.</b><br><span class="hint-en">Tap the right words as they fall!</span></p>
+    <p class="hint"><b>Ketuk kata yang tepat saat jatuh dari atas.</b><br><span class="hint-en">Tap the right words as they fall!</span><br><b class="hint-rule">\uD83D\uDCA3 Must Click: tap! \u2620 Must Not Click: jangan tap!</b></p>
     <button class="btn" id="start-btn">Start Word Rain<br><span id="start-sub">(Mixed)</span></button>
     <button class="btn alt" id="class-btn">Classroom</button>
     <button class="btn alt hidden" id="install-btn">Install for offline</button>
@@ -463,14 +464,14 @@ function flash(text, ms) {
   setTimeout(() => f.remove(), ms);
 }
 
-function floatText(text, x, y, bad) {
+function floatText(text, x, y, bad, ms) {
   const f = document.createElement("div");
   f.className = "float" + (bad ? " bad" : "");
   f.textContent = text;
   f.style.left = Math.max(4, x - 20) + "px";
   f.style.top = Math.max(4, y - 30) + "px";
   sky.appendChild(f);
-  setTimeout(() => f.remove(), 850);
+  setTimeout(() => f.remove(), ms || 850);
 }
 
 function ring(x, y) {
@@ -518,9 +519,9 @@ function mutate(item){
   item.inner.classList.add(mustClick ? "must-click" : "must-not-click");
   item.inner.classList.add("mutate");
   item.inner.innerHTML = mustClick
-    ? '<span class="pic">\u2620</span><span class="word">' + item.data.en + "</span>"
-    : '<span class="pic">\uD83D\uDCA3</span><span class="word">' + item.data.en + "</span>";
-  floatText(mustClick ? "Must Click!" : "Must Not Click!", item.x, item.y, true);
+    ? '<span class="pic">\uD83D\uDCA3</span><span class="word">' + item.data.en + "</span>"
+    : '<span class="pic">\u2620</span><span class="word">' + item.data.en + "</span>";
+  floatText(mustClick ? "Must Click!" : "Must Not Click!", item.x, item.y, true, 1800);
   sfx.mutate();
   setTimeout(() => item.inner.classList.remove("mutate"), 380);
 }
