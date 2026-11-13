@@ -252,7 +252,8 @@ const CONFIG = {
   meterMutantDrain: 12,
   meterLevelRefill: 15,
   coinDivisor: 20,
-  coinPerLevel: 5
+  coinPerLevel: 5,
+  debugPrice: 1   // DEBUG: every item costs 1 coin. set to 0 to restore real prices
 };
 /* SCENE: layer layout from Restu's hand-tuned slots.json (x,y,w in 1024 space) */
 const SCENE = {
@@ -881,17 +882,19 @@ function renderShop(){
       btn.disabled = true;
       btn.className = "alt";
     } else {
-      btn.textContent = it.price + " koin";
-      btn.className = save.coins >= it.price ? "" : "alt";
+      const price = priceOf(it);
+      btn.textContent = price + " koin";
+      btn.className = save.coins >= price ? "" : "alt";
       btn.addEventListener("click", () => buy(it));
     }
     card.append(img, nm, btn);
     wrap.appendChild(card);
   });
 }
+function priceOf(it){ return CONFIG.debugPrice || it.price; }
 function buy(it){
-  if (owns(it.id) || save.coins < it.price) return;
-  save.coins -= it.price;
+  if (owns(it.id) || save.coins < priceOf(it)) return;
+  save.coins -= priceOf(it);
   save.owned.push(it.id);
   persist();
   sfx.heal();
