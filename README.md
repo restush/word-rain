@@ -12,7 +12,7 @@ Made for SDIT Baitussalam 2 Cangkringan (Fase B, English).
 - The energy bar drains over time and refills on correct taps. Empty bar = run over.
 - 3 lives. Cards sometimes MUTATE mid-fall into one of two species (only while high on
   screen, so you always get reaction time): **Must Click** (red card, 💣 bomb: tap to
-  defuse +5, or it costs a life when it falls) and **Must Not Click** (dark card, ☠ skull:
+  defuse +5, or it costs a life when it falls; the fuse bar on the card shows how much fall time is left, normalized from mutation point to bottom) and **Must Not Click** (dark card, ☠ skull:
   never tap it (costs a life), letting it fall is fine). Heart cards refill a life (only appear when lives < 3).
 - Round types rotate: picture prompt, category rush, listen and tap, picture match.
 - Score becomes coins: floor(score / 20) + 5 per level.

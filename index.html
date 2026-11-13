@@ -80,6 +80,8 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .card-inner.must-not-click{background:#2B2B33;border-color:#000}
 .card-inner.must-not-click .word{color:var(--cream)}
 .card-inner.must-click .pic,.card-inner.must-not-click .pic{background:#fff;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid #2B2B33}
+.card-inner .fuse{width:82%;height:9px;background:#fff;border:2px solid #2B2B33;border-radius:6px;overflow:hidden;margin-top:3px}
+.card-inner .fuse i{display:block;height:100%;width:0;background:var(--bad)}
 .card-inner.buff{background:var(--sun)}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
@@ -523,6 +525,11 @@ function mutate(item){
   item.inner.innerHTML = mustClick
     ? '<span class="pic">\uD83D\uDCA3</span><span class="word">' + item.data.en + "</span>"
     : '<span class="pic">\u2620</span><span class="word">' + item.data.en + "</span>";
+  if (mustClick) {
+    item.inner.innerHTML += '<span class="fuse"><i></i></span>';
+    item.fuse = item.inner.querySelector("i");
+    item.mutateY = item.y;
+  }
   floatText(mustClick ? "Must Click!" : "Must Not Click!", item.x, item.y, true, 1800);
   sfx.mutate();
   setTimeout(() => item.inner.classList.remove("mutate"), 380);
@@ -765,6 +772,10 @@ function loop(t) {
       item.y += item.speed * dt;
       item.el.style.transform =
         "translate(" + item.x + "px, " + item.y + "px)";
+      if (item.fuse) {
+        const p = Math.min(1, (item.y - item.mutateY) / (h + 20 - item.mutateY));
+        item.fuse.style.width = (p * 100) + "%";
+      }
       if (item.kind === "normal" && item.y > -20 && item.y < h * CONFIG.mutateMaxY &&
           Math.random() < (CONFIG.mutatePerSec + (state.level - 1) * CONFIG.mutateGrowPerLevel) * dt) {
         mutate(item);
