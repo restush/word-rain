@@ -21,3 +21,13 @@ Commit and push; GitHub Pages redeploys in about a minute.
 - `index.html` — the game (teachers edit only the CONTENT table)
 - `poster.html` — classroom QR poster template
 - `make_qr.py` — QR generator (writes `qr.svg`)
+
+## Make a new game from this engine (10 minutes)
+
+The engine is generic for any falling-tap vocabulary game. Copy `index.html` into the new `project/<gamename>/` folder, then edit ONLY the three tables at the top of the script:
+
+1. `CONTENT`: the word lists. `en` = target word, `id` = the hint/gloss, `pic` = emoji or `#hexcolor`, `tag` = category. Any topic, grade, or language pair.
+2. `CONFIG`: all difficulty knobs: lives, meter drain/refill, speeds, spawn rates, mutation/buff chances, star thresholds.
+3. `ROUND_PLAN`: which prompt types rotate and in what order (word / category / listen / picture).
+
+Everything below the "engine: teachers do not edit below" marker is shared mechanics. Never edit it for content changes. Known limits: one game = one copy of the shell (offline robustness beats sharing a module), and the skull/heart hazard visuals are engine-level (one edit if a game needs different ones).
