@@ -47,6 +47,10 @@
   <div class="row"><label>X</label><input type="number" id="px"><label>Y</label><input type="number" id="py"></div>
   <div class="row"><label>Width</label><input type="number" id="pw"></div>
   <div class="row"><label>Rotate</label><input type="range" id="prot" min="-25" max="25" step="0.5" value="0"><span id="protv">0</span></div>
+  <div class="row"><label>Skew X</label><input type="range" id="pskx" min="-40" max="40" step="0.5" value="0"><span id="pskxv">0</span></div>
+  <div class="row"><label>Skew Y</label><input type="range" id="psky" min="-40" max="40" step="0.5" value="0"><span id="pskyv">0</span></div>
+  <div class="row"><label>Scale X</label><input type="range" id="pscx" min="0.3" max="2.5" step="0.01" value="1"><span id="pscxv">1</span></div>
+  <div class="row"><label>Scale Y</label><input type="range" id="pscy" min="0.3" max="2.5" step="0.01" value="1"><span id="pscyv">1</span></div>
   <div class="row">
     <button class="alt" id="flip">Flip</button>
     <button class="alt" id="zup">Z up</button>
@@ -89,7 +93,8 @@ function place(st){
   st.el.style.left = st.x + "px";
   st.el.style.top = st.y + "px";
   st.el.style.width = st.w + "px";
-  st.el.style.transform = "rotate(" + st.rot + "deg)" + (st.flip ? " scaleX(-1)" : "");
+  st.el.style.transform = "rotate(" + st.rot + "deg) skewX(" + st.skx + "deg) skewY(" +
+    st.sky + "deg) scale(" + (st.flip ? -st.scx : st.scx) + "," + st.scy + ")";
   st.el.style.display = st.visible ? "" : "none";
 }
 function reorder(){ layers.forEach((st) => stage.appendChild(st.el)); }
@@ -98,11 +103,17 @@ function sync(){
     $("px").value = sel.x; $("py").value = sel.y; $("pw").value = sel.w;
     $("prot").value = sel.rot; $("protv").textContent = sel.rot;
     $("coords").textContent = sel.name + "   x:" + sel.x + "  y:" + sel.y +
-      "  w:" + sel.w + "  rot:" + sel.rot + (sel.flip ? "  flipped" : "");
+      "  w:" + sel.w + "  rot:" + sel.rot + "  skew:" + sel.skx + "/" + sel.sky +
+      "  scale:" + sel.scx + "/" + sel.scy + (sel.flip ? "  flipped" : "");
+    $("pskx").value = sel.skx; $("pskxv").textContent = sel.skx;
+    $("psky").value = sel.sky; $("pskyv").textContent = sel.sky;
+    $("pscx").value = sel.scx; $("pscxv").textContent = sel.scx;
+    $("pscy").value = sel.scy; $("pscyv").textContent = sel.scy;
   }
   const out = {};
   layers.forEach((st) => {
-    out[st.name] = {x: st.x, y: st.y, w: st.w, rot: st.rot, flip: st.flip, visible: st.visible};
+    out[st.name] = {x: st.x, y: st.y, w: st.w, rot: st.rot, skx: st.skx, sky: st.sky,
+      scx: st.scx, scy: st.scy, flip: st.flip, visible: st.visible};
   });
   $("out").value = JSON.stringify(out, null, 1);
 }
@@ -172,7 +183,8 @@ function init(){
     const img = document.createElement("img");
     img.className = "layer";
     img.src = ASSET + name + "-cut.png";
-    const st = {name: name, x: row[1], y: row[2], w: row[3], rot: 0, flip: false, visible: true, el: img};
+    const st = {name: name, x: row[1], y: row[2], w: row[3], rot: 0, skx: 0, sky: 0,
+      scx: 1, scy: 1, flip: false, visible: true, el: img};
     img.addEventListener("pointerdown", (e) => startDrag(e, st));
     stage.appendChild(img);
     layers.push(st);
@@ -195,6 +207,14 @@ $("prot").addEventListener("input", () => {
   sel.rot = parseFloat($("prot").value);
   place(sel); sync();
 });
+["pskx", "psky", "pscx", "pscy"].forEach((id) => $(id).addEventListener("input", () => {
+  if (!sel) return;
+  sel.skx = parseFloat($("pskx").value);
+  sel.sky = parseFloat($("psky").value);
+  sel.scx = parseFloat($("pscx").value);
+  sel.scy = parseFloat($("pscy").value);
+  place(sel); sync();
+}));
 $("flip").addEventListener("click", () => {
   if (!sel) return;
   sel.flip = !sel.flip; place(sel); sync();
