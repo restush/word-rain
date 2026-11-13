@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Rain: Hujan Kata (Grade 3 English)</title>
+<title>Word Rain: Hujan Kata</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A535C">
 <meta name="mobile-web-app-capable" content="yes">
@@ -79,7 +79,9 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
 #screen-class{justify-content:flex-start;gap:8px;padding:12px}
-#class-top{display:flex;align-items:center;gap:8px;width:100%}
+#class-top{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap}
+#class-top .btn{min-width:0;padding:10px 14px;font-size:15px}
+.sub-title{font-size:17px;font-weight:bold;margin:-8px 0 -4px}
 #class-stage-wrap{width:100%;max-width:600px;aspect-ratio:1;position:relative;flex:0 0 auto}
 #class-stage{position:absolute;top:0;left:0;width:1024px;height:1024px;transform-origin:top left}
 #class-stage img{position:absolute;user-select:none;-webkit-user-drag:none}
@@ -105,7 +107,8 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 
   <div id="screen-title" class="screen">
     <h1>WORD RAIN</h1>
-    <p class="tagline">Word Rain · Hujan Kata: game Bahasa Inggris Kelas 3</p>
+    <p class="sub-title">(Hujan Kata)</p>
+    <p class="tagline">Game Bahasa Inggris</p>
     <div class="packs" id="packs" role="group" aria-label="Pilih tema">
       <button class="pack-btn" data-pack="animals" aria-pressed="false">Animals</button>
       <button class="pack-btn" data-pack="colors" aria-pressed="false">Colors</button>
@@ -113,8 +116,8 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="school" aria-pressed="false">School</button>
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
-    <button class="btn" id="start-btn">MULAI MAIN</button>
-    <button class="btn alt" id="class-btn">KELAS KAMI</button>
+    <button class="btn" id="start-btn">Start Word Rain</button>
+    <button class="btn alt" id="class-btn">Classroom</button>
     <button class="btn alt hidden" id="install-btn">Install untuk offline</button>
     <p class="hint">Ketuk kata yang tepat saat jatuh dari atas.<br>Tap the right words as they fall!</p>
     <p class="credit">SDIT Baitussalam 2 Cangkringan</p>
@@ -144,7 +147,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
     <p class="tagline" id="coin-earn">+0 koin untuk kelas</p>
     <button class="btn" id="retry-btn">MAIN LAGI</button>
     <button class="btn alt" id="menu-btn">GANTI TEMA</button>
-    <button class="btn alt" id="to-class-btn">KE KELAS</button>
+    <button class="btn alt" id="to-class-btn">Classroom</button>
   </div>
 
   <div id="screen-class" class="screen hidden">
@@ -287,21 +290,21 @@ const SCENE = {
 };
 /* SHOP: replaces = hides old layer, clears = hides overlapped leftovers, requires = hidden until owned */
 const SHOP = [
-  {id:"fix-window",layer:"fix-window",name:"Perbaiki Jendela",price:100,replaces:["old-window"],requires:[],clears:[]},
-  {id:"whiteboard",layer:"whiteboard",name:"Papan Tulis",price:200,replaces:["blackboard"],requires:[],clears:[]},
-  {id:"ac",layer:"ac",name:"AC Dinding",price:250,replaces:["old-fan"],requires:[],clears:["map"]},
-  {id:"wall-paint",layer:"wall-paint",name:"Cat Dinding",price:160,replaces:["old-wall"],requires:[],clears:[]},
-  {id:"floor-tiles",layer:"floor-tiles",name:"Ubin Baru",price:180,replaces:["old-floor"],requires:[],clears:[]},
+  {id:"fix-window",layer:"fix-window",name:"Fix Window",price:100,replaces:["old-window"],requires:[],clears:[]},
+  {id:"whiteboard",layer:"whiteboard",name:"Whiteboard",price:200,replaces:["blackboard"],requires:[],clears:[]},
+  {id:"ac",layer:"ac",name:"Air Conditioner",price:250,replaces:["old-fan"],requires:[],clears:["map"]},
+  {id:"wall-paint",layer:"wall-paint",name:"Wall Paint",price:160,replaces:["old-wall"],requires:[],clears:[]},
+  {id:"floor-tiles",layer:"floor-tiles",name:"New Tiles",price:180,replaces:["old-floor"],requires:[],clears:[]},
   {id:"tv",layer:"tv",name:"Smart TV",price:300,replaces:["clock"],requires:[],clears:[]},
-  {id:"bookshelf",layer:"bookshelf-new",name:"Rak Buku",price:180,replaces:["bookshelf"],requires:[],clears:["rugs","plant"]},
-  {id:"prayer-rugs",layer:"rugs-new",name:"Sajadah Rapi",price:130,replaces:["rugs"],requires:[],clears:["bookshelf"]},
-  {id:"plants",layer:"plants-new",name:"Tanaman Segar",price:150,replaces:["plant"],requires:[],clears:["rugs"]},
+  {id:"bookshelf",layer:"bookshelf-new",name:"Bookshelf",price:180,replaces:["bookshelf"],requires:[],clears:["rugs","plant"]},
+  {id:"prayer-rugs",layer:"rugs-new",name:"Prayer Rug",price:130,replaces:["rugs"],requires:[],clears:["bookshelf"]},
+  {id:"plants",layer:"plants-new",name:"Potted Plants",price:150,replaces:["plant"],requires:[],clears:["rugs"]},
   {id:"curtains",layer:"curtains",name:"Gorden",price:130,replaces:[],requires:["fix-window"],clears:[]},
-  {id:"poster-map",layer:"poster-map",name:"Peta Dunia",price:120,replaces:["map"],requires:[],clears:[]},
-  {id:"poster-english",layer:"poster-english",name:"Poster Gambar",price:120,replaces:[],requires:[],clears:["old-fan"]},
-  {id:"kaligrafi",layer:"kaligrafi",name:"Kaligrafi",price:200,replaces:[],requires:["ac"],clears:[]},
-  {id:"flag",layer:"flag",name:"Bendera Merah Putih",price:100,replaces:[],requires:[],clears:[]},
-  {id:"papan-karya",layer:"papan-karya",name:"Papan Karya",price:150,replaces:[],requires:[],clears:[]}
+  {id:"poster-map",layer:"poster-map",name:"World Map",price:120,replaces:["map"],requires:[],clears:[]},
+  {id:"poster-english",layer:"poster-english",name:"Picture Poster",price:120,replaces:[],requires:[],clears:["old-fan"]},
+  {id:"kaligrafi",layer:"kaligrafi",name:"Geometric Art",price:200,replaces:[],requires:["ac"],clears:[]},
+  {id:"flag",layer:"flag",name:"Flag",price:100,replaces:[],requires:[],clears:[]},
+  {id:"papan-karya",layer:"papan-karya",name:"Display Board",price:150,replaces:[],requires:[],clears:[]}
 ];
 /* --- engine --- */
 

@@ -1,7 +1,7 @@
 {
-  "name": "Word Rain: Hujan Kata (Grade 3 English)",
+  "name": "Word Rain: Hujan Kata",
   "short_name": "Word Rain",
-  "description": "Game vocabulary Bahasa Inggris Kelas 3: tap the falling words.",
+  "description": "Game vocabulary Bahasa Inggris: tap the falling words.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
