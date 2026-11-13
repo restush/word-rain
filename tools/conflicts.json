@@ -1,0 +1,41 @@
+{
+ "fix-window": [
+  "plant"
+ ],
+ "kaligrafi": [
+  "old-fan",
+  "map"
+ ],
+ "whiteboard": [
+  "clock"
+ ],
+ "ac": [
+  "map"
+ ],
+ "rugs-new": [
+  "bookshelf"
+ ],
+ "poster-map": [
+  "bookshelf"
+ ],
+ "bookshelf-new": [
+  "old-window",
+  "rugs",
+  "plant"
+ ],
+ "plants-new": [
+  "rugs"
+ ],
+ "curtains": [
+  "old-window"
+ ],
+ "tv": [
+  "blackboard"
+ ],
+ "poster-english": [
+  "old-fan"
+ ],
+ "papan-karya": [
+  "bookshelf"
+ ]
+}
