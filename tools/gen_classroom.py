@@ -40,6 +40,31 @@ PROMPTS = {
         "bookshelf along the left wall, a potted plant in the front corner, a stack of rugs "
         "in another corner. Mood: tired and quiet, waiting to be repaired. " + STYLE
     ),
+    "fix-window": (
+        "Using the attached classroom image ONLY as reference for exact position, size, "
+        "isometric angle and pixel-art style. Draw ONLY a single flat window seen at the exact "
+        "isometric tilt of the left-wall window in the reference: ONE window plane only, wooden "
+        "frame, clean intact glass panes, TALL and NARROW like that window: about twice as tall "
+        "as it is wide, 2 panes wide and 3 panes tall, same silhouette and footprint as that "
+        "window. NOT a "
+        "corner unit, NOT freestanding, no second window face, no floor plinth, no sill below. "
+        "Isolated on a plain pure white background. No walls, no room, nothing else. " + STYLE
+    ),
+    "whiteboard": (
+        "Using the attached classroom image ONLY as reference for exact position, size, "
+        "isometric angle and pixel-art style. Draw ONLY a white whiteboard with a marker tray "
+        "that FULLY COVERS the blackboard from the reference: exact same width and height as the "
+        "blackboard including its frame area, same isometric tilt, same wall plane, so it can be "
+        "pasted directly over the blackboard. Isolated on a plain pure white background, no "
+        "walls, no other objects, nothing else. " + STYLE
+    ),
+    "ac": (
+        "Using the attached classroom image ONLY as reference for exact position, size, "
+        "isometric angle and pixel-art style. Draw ONLY a modern white wall-mounted air "
+        "conditioner unit, sized to replace the old wall fan from the reference, same "
+        "isometric angle, isolated on a plain pure white background. No walls, no floor, no "
+        "room, no other objects, nothing else. " + STYLE
+    ),
 }
 
 
