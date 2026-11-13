@@ -18,9 +18,9 @@ Commit and push; GitHub Pages redeploys in about a minute.
 
 ## Structure
 
-- `index.html` — the game (teachers edit only the CONTENT table)
-- `poster.html` — classroom QR poster template
-- `make_qr.py` — QR generator (writes `qr.svg`)
+- `index.html` : the game (teachers edit only the CONTENT table)
+- `poster.html` : classroom QR poster template
+- `make_qr.py` : QR generator (writes `qr.svg`)
 
 ## Make a new game from this engine (10 minutes)
 
