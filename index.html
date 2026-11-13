@@ -78,6 +78,9 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .card-inner.buff{background:var(--sun)}
 @keyframes buffglow{50%{box-shadow:0 0 0 7px rgba(78,205,196,.45)}}
 .card.buff-glow{animation:buffglow 1.2s infinite}
+#screen-title .tagline{margin-top:-4px;margin-bottom:2px}
+.divider{width:64%;height:3px;background:var(--teal);opacity:.4;border-radius:2px}
+#start-sub{display:block;font-size:14px;font-weight:normal;margin-top:2px}
 #screen-class{justify-content:flex-start;gap:8px;padding:12px}
 #class-top{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap}
 #class-top .btn{min-width:0;padding:10px 14px;font-size:15px}
@@ -109,6 +112,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
     <h1>WORD RAIN</h1>
     <p class="sub-title">(Hujan Kata)</p>
     <p class="tagline">Game Bahasa Inggris</p>
+    <div class="divider"></div>
     <div class="packs" id="packs" role="group" aria-label="Pilih tema">
       <button class="pack-btn" data-pack="animals" aria-pressed="false">Animals</button>
       <button class="pack-btn" data-pack="colors" aria-pressed="false">Colors</button>
@@ -116,7 +120,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="pack-btn" data-pack="school" aria-pressed="false">School</button>
       <button class="pack-btn" data-pack="mixed" aria-pressed="true">Mixed</button>
     </div>
-    <button class="btn" id="start-btn">Start Word Rain</button>
+    <button class="btn" id="start-btn">Start Word Rain<br><span id="start-sub">(Mixed)</span></button>
     <button class="btn alt" id="class-btn">Classroom</button>
     <button class="btn alt hidden" id="install-btn">Install untuk offline</button>
     <p class="hint">Ketuk kata yang tepat saat jatuh dari atas.<br>Tap the right words as they fall!</p>
@@ -771,6 +775,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"), (btn) => {
     Array.prototype.forEach.call(document.querySelectorAll(".pack-btn"),
       (b) => b.setAttribute("aria-pressed", String(b === btn)));
     state.pack = btn.getAttribute("data-pack");
+    $("start-sub").textContent = "(" + btn.textContent.trim() + ")";
     sfx.pop();
   });
 });
