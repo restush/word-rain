@@ -883,14 +883,20 @@ function sceneVisible(name){
   }
   return true;
 }
+const GRID = 171; /* chunks across the 1024 stage; matches tools/regrid.py */
+const CHUNK_ST = 1024 / GRID;
 const SPRITES = {};
-const SPRITE_V = "v3"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v4"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
   const dpr = Math.max(1, window.devicePixelRatio || 1);
   const cssW = wrap.clientWidth;
-  const size = Math.max(1, Math.round(cssW * dpr)); /* backing store = device px, 1:1 */
+  const dev = Math.max(1, Math.floor(cssW * dpr / GRID)); /* whole device px per chunk */
+  stage.dataset.dev = dev;
+  stage.dataset.cssw = cssW;
+  stage.dataset.vw = window.innerWidth;
+  const size = GRID * dev;
   stage.width = size;
   stage.height = size;
   const cssSize = size / dpr;
@@ -900,9 +906,8 @@ function buildScene(){
   stage.style.top = "0px";
   const ctx = stage.getContext("2d");
   ctx.imageSmoothingEnabled = false; /* nearest neighbour — the engine guarantee */
-  const px = size / 1024; /* tuned 1024-space -> device px */
   const base = SPRITES["shell-base"];
-  if (base) ctx.drawImage(base, 0, 0, size, size * base.naturalHeight / base.naturalWidth);
+  if (base) ctx.drawImage(base, 0, 0, GRID * dev, base.naturalHeight * dev);
   const names = Object.keys(SCENE);
   const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
     .concat(names.filter((n) => FLOOR_ITEMS.indexOf(n) >= 0));
@@ -911,10 +916,27 @@ function buildScene(){
     if (!sceneVisible(name)) return;
     const img = SPRITES[name];
     if (!img) return;
-    const hBox = s.w * img.naturalHeight / img.naturalWidth;
-    const w = s.w * s.scx * px, h = hBox * s.scy * px;
+    const cw = img.naturalWidth, ch = img.naturalHeight; /* 1 src px = 1 chunk */
+    const w = cw * dev, h = ch * dev;
+    /* visual centre in stage px: scale is baked into the grid, so only the
+       un-scaled box height (hBox = ch * CHUNK_ST / scy) is needed */
+    const cx = (s.x + s.w / 2) / CHUNK_ST;
+    const cy = (s.y + ch * CHUNK_ST / (2 * s.scy)) / CHUNK_ST;
+    if (!s.rot && !s.skx && !s.sky) {
+      const x = Math.round(cx - cw / 2) * dev, y = Math.round(cy - ch / 2) * dev;
+      if (s.flip) {
+        ctx.save();
+        ctx.translate(x + w, y);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img, 0, 0, w, h);
+        ctx.restore();
+      } else {
+        ctx.drawImage(img, x, y, w, h);
+      }
+      return;
+    }
     ctx.save();
-    ctx.translate(Math.round((s.x + s.w / 2) * px), Math.round((s.y + hBox / 2) * px));
+    ctx.translate(Math.round(cx) * dev, Math.round(cy) * dev);
     if (s.rot) ctx.rotate(s.rot * Math.PI / 180);
     if (s.skx) ctx.transform(1, 0, Math.tan(s.skx * Math.PI / 180), 1, 0, 0);
     if (s.sky) ctx.transform(1, Math.tan(s.sky * Math.PI / 180), 0, 1, 0, 0);
@@ -922,7 +944,9 @@ function buildScene(){
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
   });
+  stage.dataset.rect = JSON.stringify(stage.getBoundingClientRect());
 }
+
 
 
 
@@ -1028,6 +1052,7 @@ window.addEventListener("resize", () => {
 
 updateHud();
 requestAnimationFrame(loop);
+if (location.hash === "#class") window.addEventListener("load", () => setTimeout(openClass, 300)); /* deep-link for QA screenshots */
 </script>
 </body>
 </html>
