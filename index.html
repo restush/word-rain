@@ -96,14 +96,14 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .hint-en{display:block;font-size:12px;opacity:.8;margin-top:2px}
 #class-stage-wrap{width:100%;max-width:600px;aspect-ratio:1;position:relative;flex:0 0 auto}
 #class-stage{position:absolute;top:0;left:0;width:1024px;height:1024px;transform-origin:top left}
-#class-stage img{position:absolute;user-select:none;-webkit-user-drag:none}
+#class-stage img{position:absolute;user-select:none;-webkit-user-drag:none;image-rendering:pixelated}
 #class-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--cream);border-radius:12px;z-index:9;font-size:15px;font-weight:bold}
 #class-loading.hidden{display:none}
 .spinner{width:40px;height:40px;border:5px solid var(--sun);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #shop{display:flex;gap:8px;overflow-x:auto;width:100%;padding:4px 2px 10px;margin-top:auto}
 .shop-item{flex:0 0 108px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:6px;text-align:center;font-size:12px}
-.shop-item img{width:66px;height:66px;object-fit:contain}
+.shop-item img{width:66px;height:66px;object-fit:contain;image-rendering:pixelated}
 .shop-item .nm{font-weight:bold;display:block;min-height:30px}
 .shop-item button{width:100%;margin-top:4px;padding:9px 4px;font-size:13px;border-radius:10px}
 .shop-item button[disabled]{opacity:.6}

@@ -87,6 +87,8 @@ def main():
     else:
         bg = sys.argv[2] if len(sys.argv) > 2 else "shell.png"
         base = Image.open(ASSETS / bg).convert("RGBA")
+        if base.size != (1024, 1024):
+            base = base.resize((1024, 1024), Image.NEAREST)
         names = FINAL if mode == "final" else ORDER
         for name in names:
             cut = ASSETS / (name + "-cut.webp")
