@@ -883,20 +883,14 @@ function sceneVisible(name){
   }
   return true;
 }
-const GRID = 171; /* chunks across the 1024 stage; matches tools/regrid.py */
-const CHUNK_ST = 1024 / GRID;
 const SPRITES = {};
-const SPRITE_V = "v4"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v5"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
   const dpr = Math.max(1, window.devicePixelRatio || 1);
   const cssW = wrap.clientWidth;
-  const dev = Math.max(1, Math.floor(cssW * dpr / GRID)); /* whole device px per chunk */
-  stage.dataset.dev = dev;
-  stage.dataset.cssw = cssW;
-  stage.dataset.vw = window.innerWidth;
-  const size = GRID * dev;
+  const size = Math.max(1, Math.round(cssW * dpr)); /* backing store = device px */
   stage.width = size;
   stage.height = size;
   const cssSize = size / dpr;
@@ -905,9 +899,15 @@ function buildScene(){
   stage.style.left = Math.max(0, Math.round((cssW - cssSize) / 2)) + "px";
   stage.style.top = "0px";
   const ctx = stage.getContext("2d");
-  ctx.imageSmoothingEnabled = false; /* nearest neighbour — the engine guarantee */
+  ctx.imageSmoothingEnabled = false; /* point sample — same as the shop icons */
+  const px = size / 1024; /* tuned 1024-space -> device px */
+  /* Pixel-perfect rule (the Unity rule): each sprite's own grid maps to a whole
+     number of device pixels. k = integer device px per art pixel, per sprite. */
   const base = SPRITES["shell-base"];
-  if (base) ctx.drawImage(base, 0, 0, GRID * dev, base.naturalHeight * dev);
+  if (base) {
+    const kb = Math.max(1, Math.round(size / base.naturalWidth));
+    ctx.drawImage(base, 0, 0, base.naturalWidth * kb, base.naturalHeight * kb);
+  }
   const names = Object.keys(SCENE);
   const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
     .concat(names.filter((n) => FLOOR_ITEMS.indexOf(n) >= 0));
@@ -916,14 +916,14 @@ function buildScene(){
     if (!sceneVisible(name)) return;
     const img = SPRITES[name];
     if (!img) return;
-    const cw = img.naturalWidth, ch = img.naturalHeight; /* 1 src px = 1 chunk */
-    const w = cw * dev, h = ch * dev;
-    /* visual centre in stage px: scale is baked into the grid, so only the
-       un-scaled box height (hBox = ch * CHUNK_ST / scy) is needed */
-    const cx = (s.x + s.w / 2) / CHUNK_ST;
-    const cy = (s.y + ch * CHUNK_ST / (2 * s.scy)) / CHUNK_ST;
+    const cw = img.naturalWidth, ch = img.naturalHeight;
+    const k = Math.max(1, Math.round(s.w * s.scx * px / cw)); /* whole device px per art px */
+    const w = cw * k, h = ch * k;
+    const hBox = s.w * ch / cw;
+    const cx = Math.round((s.x + s.w / 2) * px), cy = Math.round((s.y + hBox / 2) * px);
+    (window.__drawn = window.__drawn || []).push([name, img.naturalWidth, img.naturalHeight, k, Math.round(cx - w / 2), Math.round(cy - h / 2), w, h]);
     if (!s.rot && !s.skx && !s.sky) {
-      const x = Math.round(cx - cw / 2) * dev, y = Math.round(cy - ch / 2) * dev;
+      const x = Math.round(cx - w / 2), y = Math.round(cy - h / 2);
       if (s.flip) {
         ctx.save();
         ctx.translate(x + w, y);
@@ -936,18 +936,17 @@ function buildScene(){
       return;
     }
     ctx.save();
-    ctx.translate(Math.round(cx) * dev, Math.round(cy) * dev);
+    ctx.translate(cx, cy);
     if (s.rot) ctx.rotate(s.rot * Math.PI / 180);
     if (s.skx) ctx.transform(1, 0, Math.tan(s.skx * Math.PI / 180), 1, 0, 0);
     if (s.sky) ctx.transform(1, Math.tan(s.sky * Math.PI / 180), 0, 1, 0, 0);
-    if (s.flip) ctx.scale(-1, 1);
+    ctx.scale(s.flip ? -1 : 1, s.scy / s.scx);
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
   });
   stage.dataset.rect = JSON.stringify(stage.getBoundingClientRect());
+  stage.dataset.drawn = JSON.stringify(window.__drawn || []);
 }
-
-
 
 
 function classFlash(msg){
