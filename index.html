@@ -889,7 +889,7 @@ function buildScene(){
   const base = document.createElement("img");
   base.src = "assets/shell-base-cut.webp";
   base.alt = "";
-  base.style.cssText = "left:0;top:0;width:1024px";
+  base.style.cssText = "left:0;top:0;width:" + (1024 * classZ) + "px";
   stage.appendChild(base);
   const names = Object.keys(SCENE);
   const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
@@ -899,19 +899,23 @@ function buildScene(){
     const img = document.createElement("img");
     img.src = "assets/" + name + "-cut.webp";
     img.alt = name;
-    img.style.left = s.x + "px";
-    img.style.top = s.y + "px";
-    img.style.width = s.w + "px";
+    img.style.left = s.x * classZ + "px";
+    img.style.top = s.y * classZ + "px";
+    img.style.width = s.w * classZ + "px";
     img.style.transform = "rotate(" + s.rot + "deg) skewX(" + s.skx + "deg) skewY(" +
       s.sky + "deg) scale(" + (s.flip ? -s.scx : s.scx) + "," + s.scy + ")";
     img.style.display = sceneVisible(name) ? "" : "none";
     stage.appendChild(img);
   });
 }
+let classZ = 1;
 function fitClass(){
   const wrap = $("class-stage-wrap");
-  const z = wrap.clientWidth / 1024;
-  $("class-stage").style.transform = "scale(" + z + ")";
+  classZ = wrap.clientWidth / 1024;
+  const st = $("class-stage");
+  st.style.transform = "none";
+  st.style.width = 1024 * classZ + "px";
+  st.style.height = 1024 * classZ + "px";
 }
 function classFlash(msg){
   const f = $("class-flash");
@@ -991,7 +995,10 @@ $("class-back").addEventListener("click", () => show("title"));
 $("class-play").addEventListener("click", startGame);
 $("shop-prev").addEventListener("click", () => $("shop").scrollBy({left: -260, behavior: "smooth"}));
 $("shop-next").addEventListener("click", () => $("shop").scrollBy({left: 260, behavior: "smooth"}));
-window.addEventListener("resize", fitClass);
+window.addEventListener("resize", () => {
+  fitClass();
+  if (!$("screen-class").classList.contains("hidden")) buildScene();
+});
 
 updateHud();
 requestAnimationFrame(loop);
