@@ -1,1 +1,5 @@
 .DS_Store
+
+# raws/intermediates live in ../word-rain-src — only *-cut.webp ships
+assets/*.png
+assets/_*

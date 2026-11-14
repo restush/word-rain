@@ -11,7 +11,7 @@ import sys
 import pathlib
 from PIL import Image
 
-ASSETS = pathlib.Path(__file__).resolve().parent.parent / "assets"
+ASSETS = pathlib.Path(__file__).resolve().parent.parent.parent / "word-rain-src"
 
 # slot boxes: (x0, y0, x1, y1) on the 1024 canvas
 SLOTS = {

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Word Rain: Hujan Kata</title>
+<link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A535C">
 <meta name="mobile-web-app-capable" content="yes">
@@ -106,7 +107,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 .shop-hint{font-size:12px;font-weight:bold;opacity:.75}
 #shop{display:flex;gap:8px;overflow-x:auto;width:100%;padding:4px 2px 10px;margin-top:auto}
 .shop-item{flex:0 0 108px;background:#fff;border:3px solid var(--teal);border-radius:14px;padding:6px;text-align:center;font-size:12px}
-.shop-item img{width:66px;height:66px;object-fit:contain;image-rendering:pixelated}
+.shop-item canvas{display:block;margin:0 auto}
 .shop-item .nm{font-weight:bold;display:block;min-height:30px}
 .shop-item button{width:100%;margin-top:4px;padding:9px 4px;font-size:13px;border-radius:10px}
 .shop-item button[disabled]{opacity:.6}
@@ -883,6 +884,7 @@ function sceneVisible(name){
   return true;
 }
 const SPRITES = {};
+const SPRITE_V = "v3"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -912,7 +914,7 @@ function buildScene(){
     const hBox = s.w * img.naturalHeight / img.naturalWidth;
     const w = s.w * s.scx * px, h = hBox * s.scy * px;
     ctx.save();
-    ctx.translate((s.x + s.w / 2) * px, (s.y + hBox / 2) * px);
+    ctx.translate(Math.round((s.x + s.w / 2) * px), Math.round((s.y + hBox / 2) * px));
     if (s.rot) ctx.rotate(s.rot * Math.PI / 180);
     if (s.skx) ctx.transform(1, 0, Math.tan(s.skx * Math.PI / 180), 1, 0, 0);
     if (s.sky) ctx.transform(1, Math.tan(s.sky * Math.PI / 180), 0, 1, 0, 0);
@@ -930,6 +932,26 @@ function classFlash(msg){
   f.classList.remove("hidden");
   setTimeout(() => f.classList.add("hidden"), 1100);
 }
+function pixelIcon(name, label){
+  const cv = document.createElement("canvas");
+  cv.setAttribute("role", "img");
+  cv.setAttribute("aria-label", label);
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const box = Math.round(66 * dpr);
+  cv.width = box;
+  cv.height = box;
+  cv.style.width = cv.style.height = "66px";
+  const im = new Image();
+  im.onload = () => {
+    const cx = cv.getContext("2d");
+    cx.imageSmoothingEnabled = false; /* point sample: NN guaranteed by spec, unlike CSS */
+    const k = Math.max(1, Math.floor(Math.min(box / im.naturalWidth, box / im.naturalHeight)));
+    const w = im.naturalWidth * k, h = im.naturalHeight * k;
+    cx.drawImage(im, Math.round((box - w) / 2), Math.round((box - h) / 2), w, h);
+  };
+  im.src = "assets/" + name + "-cut.webp?" + SPRITE_V;
+  return cv;
+}
 function renderShop(){
   const wrap = $("shop");
   wrap.innerHTML = "";
@@ -937,9 +959,7 @@ function renderShop(){
     if (!it.requires.every(owns)) return;
     const card = document.createElement("div");
     card.className = "shop-item";
-    const img = document.createElement("img");
-    img.src = "assets/" + it.layer + "-cut.webp";
-    img.alt = it.name;
+    const img = pixelIcon(it.layer, it.name);
     const nm = document.createElement("span");
     nm.className = "nm";
     nm.textContent = it.name;
@@ -980,7 +1000,7 @@ function preloadScene(cb){
       else SPRITES[n] = im;
       if (--left === 0) cb(failed);
     };
-    im.src = "assets/" + n + "-cut.webp";
+    im.src = "assets/" + n + "-cut.webp?" + SPRITE_V;
   });
 }
 function openClass(){

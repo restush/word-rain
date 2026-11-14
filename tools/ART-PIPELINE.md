@@ -116,7 +116,9 @@ Lessons from the test runs:
 1. Generate raw PNG with Nano Banana 2.1 (section 2), one prompt per recipe.
 2. Clean the raw: remove stray generated objects first (fans, mounts, duplicates).
 3. Convert: `ppa input.png -o out.png -t -u 4 -w 6` (or the withoutBG cutout on the old path).
-4. Save as `*-cut.webp` into `project/word-rain/assets/`.
+4. Save as `*-cut.webp` into `project/word-rain/assets/` (the deployed repo: sprites ONLY).
+   Raw generations and intermediates live OUTSIDE the deployed repo in
+   `project/word-rain-src/` (parent vault) so they are never published to Pages.
 5. Placement: coordinates live in the `SCENE` and `SHOP` tables in `index.html`, hand-tuned
    with `project/word-rain/tools/layer-tuner.html` (drag, resize, rotate, skew, flip) and
    stored in `project/word-rain/tools/slots.json`.

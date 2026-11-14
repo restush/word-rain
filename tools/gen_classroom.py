@@ -5,7 +5,7 @@ Usage:
   python3 gen_classroom.py <name> [prompt] [ref.png ...]
 Known prompt keys use built-in prompts (extra args = reference images).
 Otherwise pass the prompt as the second argument.
-Writes project/word-rain/assets/<name>.png
+Writes project/word-rain-src/<name>.png
 """
 import base64
 import json
@@ -19,7 +19,7 @@ PROJECT = "finishyourgame"
 MODEL = "gemini-nano-banana-2.1"
 URL = ("https://aiplatform.googleapis.com/v1/projects/" + PROJECT +
        "/locations/global/publishers/google/models/" + MODEL + ":generateContent")
-OUT = pathlib.Path(__file__).resolve().parent.parent / "assets"
+OUT = pathlib.Path(__file__).resolve().parent.parent.parent / "word-rain-src"
 
 STYLE = ("16-bit pixel art, 45-degree isometric room-box style (Habbo-like dollhouse), "
          "thick clean outlines, "
