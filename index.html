@@ -95,8 +95,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
 #screen-title .hint{margin:-6px 0 -2px;font-size:14px}
 .hint-en{display:block;font-size:12px;opacity:.8;margin-top:2px}
 #class-stage-wrap{width:100%;max-width:600px;aspect-ratio:1;position:relative;flex:0 0 auto}
-#class-stage{position:absolute;top:0;left:0;width:1024px;height:1024px;transform-origin:top left}
-#class-stage img{position:absolute;user-select:none;-webkit-user-drag:none;image-rendering:pixelated}
+#class-stage{position:absolute;top:0;left:0;image-rendering:pixelated}
 #class-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--cream);border-radius:12px;z-index:9;font-size:15px;font-weight:bold}
 #class-loading.hidden{display:none}
 .spinner{width:40px;height:40px;border:5px solid var(--sun);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite}
@@ -179,7 +178,7 @@ h1{font-size:clamp(38px,12vw,56px);letter-spacing:2px;line-height:1}
       <button class="btn alt small" id="class-back">BACK</button>
       <button class="btn small" id="class-play">PLAY</button>
     </div>
-    <div id="class-stage-wrap"><div id="class-stage"></div><div id="class-loading"><div class="spinner"></div><span id="class-loading-text">Loading Classroom...</span></div></div>
+    <div id="class-stage-wrap"><canvas id="class-stage"></canvas><div id="class-loading"><div class="spinner"></div><span id="class-loading-text">Loading Classroom...</span></div></div>
     <div id="shop-nav">
       <button class="nav-btn" id="shop-prev" aria-label="Scroll shop left">&#9664;</button>
       <span class="shop-hint">Geser / Swipe</span>
@@ -883,40 +882,48 @@ function sceneVisible(name){
   }
   return true;
 }
+const SPRITES = {};
 function buildScene(){
   const stage = $("class-stage");
-  stage.innerHTML = "";
-  const base = document.createElement("img");
-  base.src = "assets/shell-base-cut.webp";
-  base.alt = "";
-  base.style.cssText = "left:0;top:0;width:" + (1024 * classZ) + "px";
-  stage.appendChild(base);
+  const wrap = $("class-stage-wrap");
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const cssW = wrap.clientWidth;
+  const size = Math.max(1, Math.round(cssW * dpr)); /* backing store = device px, 1:1 */
+  stage.width = size;
+  stage.height = size;
+  const cssSize = size / dpr;
+  stage.style.width = cssSize + "px";
+  stage.style.height = cssSize + "px";
+  stage.style.left = Math.max(0, Math.round((cssW - cssSize) / 2)) + "px";
+  stage.style.top = "0px";
+  const ctx = stage.getContext("2d");
+  ctx.imageSmoothingEnabled = false; /* nearest neighbour — the engine guarantee */
+  const px = size / 1024; /* tuned 1024-space -> device px */
+  const base = SPRITES["shell-base"];
+  if (base) ctx.drawImage(base, 0, 0, size, size * base.naturalHeight / base.naturalWidth);
   const names = Object.keys(SCENE);
   const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
     .concat(names.filter((n) => FLOOR_ITEMS.indexOf(n) >= 0));
   ordered.forEach((name) => {
     const s = SCENE[name];
-    const img = document.createElement("img");
-    img.src = "assets/" + name + "-cut.webp";
-    img.alt = name;
-    img.style.left = s.x * classZ + "px";
-    img.style.top = s.y * classZ + "px";
-    img.style.width = s.w * classZ + "px";
-    img.style.transform = "rotate(" + s.rot + "deg) skewX(" + s.skx + "deg) skewY(" +
-      s.sky + "deg) scale(" + (s.flip ? -s.scx : s.scx) + "," + s.scy + ")";
-    img.style.display = sceneVisible(name) ? "" : "none";
-    stage.appendChild(img);
+    if (!sceneVisible(name)) return;
+    const img = SPRITES[name];
+    if (!img) return;
+    const hBox = s.w * img.naturalHeight / img.naturalWidth;
+    const w = s.w * s.scx * px, h = hBox * s.scy * px;
+    ctx.save();
+    ctx.translate((s.x + s.w / 2) * px, (s.y + hBox / 2) * px);
+    if (s.rot) ctx.rotate(s.rot * Math.PI / 180);
+    if (s.skx) ctx.transform(1, 0, Math.tan(s.skx * Math.PI / 180), 1, 0, 0);
+    if (s.sky) ctx.transform(1, Math.tan(s.sky * Math.PI / 180), 0, 1, 0, 0);
+    if (s.flip) ctx.scale(-1, 1);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
   });
 }
-let classZ = 1;
-function fitClass(){
-  const wrap = $("class-stage-wrap");
-  classZ = wrap.clientWidth / 1024;
-  const st = $("class-stage");
-  st.style.transform = "none";
-  st.style.width = 1024 * classZ + "px";
-  st.style.height = 1024 * classZ + "px";
-}
+
+
+
 function classFlash(msg){
   const f = $("class-flash");
   f.textContent = msg;
@@ -964,21 +971,21 @@ function buy(it){
   classFlash(it.name + " installed!");
 }
 function preloadScene(cb){
-  const files = ["shell-base-cut.webp"].concat(Object.keys(SCENE).map((n) => n + "-cut.webp"));
-  let left = files.length, failed = 0;
-  files.forEach((f) => {
+  const names = ["shell-base"].concat(Object.keys(SCENE));
+  let left = names.length, failed = 0;
+  names.forEach((n) => {
     const im = new Image();
     im.onload = im.onerror = () => {
       if (!im.naturalWidth) failed++;
+      else SPRITES[n] = im;
       if (--left === 0) cb(failed);
     };
-    im.src = "assets/" + f;
+    im.src = "assets/" + n + "-cut.webp";
   });
 }
 function openClass(){
   show("class");
   $("coin-val").textContent = save.coins;
-  fitClass();
   const overlay = $("class-loading");
   overlay.classList.remove("hidden");
   $("class-loading-text").textContent = "Loading Classroom...";
@@ -996,7 +1003,6 @@ $("class-play").addEventListener("click", startGame);
 $("shop-prev").addEventListener("click", () => $("shop").scrollBy({left: -260, behavior: "smooth"}));
 $("shop-next").addEventListener("click", () => $("shop").scrollBy({left: 260, behavior: "smooth"}));
 window.addEventListener("resize", () => {
-  fitClass();
   if (!$("screen-class").classList.contains("hidden")) buildScene();
 });
 
