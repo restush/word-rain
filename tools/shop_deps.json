@@ -1,0 +1,114 @@
+{
+ "fix-window": {
+  "replaces": [
+   "old-window"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "whiteboard": {
+  "replaces": [
+   "blackboard"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "ac": {
+  "replaces": [
+   "old-fan"
+  ],
+  "requires": [
+   "poster-map"
+  ],
+  "clears": []
+ },
+ "wall-paint": {
+  "replaces": [
+   "old-wall"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "floor-tiles": {
+  "replaces": [
+   "old-floor"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "tv": {
+  "replaces": [
+   "clock"
+  ],
+  "requires": [
+   "whiteboard"
+  ],
+  "clears": []
+ },
+ "bookshelf": {
+  "replaces": [
+   "bookshelf"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "prayer-rugs": {
+  "replaces": [
+   "rugs"
+  ],
+  "requires": [
+   "bookshelf"
+  ],
+  "clears": []
+ },
+ "plants": {
+  "replaces": [
+   "plant"
+  ],
+  "requires": [
+   "prayer-rugs"
+  ],
+  "clears": []
+ },
+ "curtains": {
+  "replaces": [],
+  "requires": [
+   "fix-window"
+  ],
+  "clears": []
+ },
+ "poster-map": {
+  "replaces": [
+   "map"
+  ],
+  "requires": [],
+  "clears": []
+ },
+ "poster-english": {
+  "replaces": [],
+  "requires": [
+   "poster-map"
+  ],
+  "clears": []
+ },
+ "kaligrafi": {
+  "replaces": [],
+  "requires": [],
+  "clears": []
+ },
+ "flag": {
+  "replaces": [],
+  "requires": [
+   "whiteboard"
+  ],
+  "clears": []
+ },
+ "papan-karya": {
+  "replaces": [],
+  "requires": [
+   "bookshelf",
+   "prayer-rugs"
+  ],
+  "clears": []
+ }
+}
