@@ -884,8 +884,7 @@ function sceneVisible(name){
   return true;
 }
 const SPRITES = {};
-const SPRITE_V = "v9"; /* bump together with sw.js CACHE on any sprite change */
-const WALL_ZONE = ["old-wall","wall-paint","old-floor","floor-tiles","old-window","fix-window"]; /* exact-slot draw, tuner-equivalent */
+const SPRITE_V = "v10"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -919,12 +918,12 @@ function buildScene(){
     const img = SPRITES[name];
     if (!img) return;
     const cw = img.naturalWidth, ch = img.naturalHeight;
-    /* Wall zone (skins/floors/windows) draws at EXACT slot geometry like the tuner
-       (fractional w, aspect h); pixel objects keep the integer-k Unity rule. */
-    const wall = WALL_ZONE.indexOf(name) >= 0;
-    const k = wall ? 0 : Math.max(1, Math.round(s.w * s.scx * px / cw)); /* whole device px per art px */
-    const w = wall ? s.w * s.scx * px : cw * k;
-    const h = wall ? w * ch / cw : ch * k;
+    /* EXACT slot geometry for every sprite (tuner-equivalent): fractional w, scy-aware h,
+       NN point sample keeps the pixel look; sizes match the tuned slots on every device. */
+    const ar = ch / cw;
+    const w = s.w * s.scx * px;
+    const h = (s.rot || s.skx || s.sky) ? w * ar : s.w * ar * s.scy * px;
+    const k = w / cw; /* effective scale (debug) */
     const hBox = s.w * ch / cw;
     const cx = Math.round((s.x + s.w / 2) * px), cy = Math.round((s.y + hBox / 2) * px);
     (window.__drawn = window.__drawn || []).push([name, img.naturalWidth, img.naturalHeight, k, Math.round(cx - w / 2), Math.round(cy - h / 2), w, h]);
