@@ -126,8 +126,12 @@ Lessons from the test runs:
 Generator script with every prompt and the 429 backoff: `project/word-rain/tools/gen_classroom.py`.
 
 
-## ERRATA (after the first full-set batch, 2026-11-14)
-- The fixed `-w 6` recipe is WRONG for scene-wide use: it produces fine grids that mush at phone scale. Correct recipe: per-sprite pixel width `pw = round(content_raw_width * CHUNK / slot_display_width)` with CHUNK = 6 stage-px (about 2.3 device px on phones). This yields pw 6 for big surfaces and pw 20-50 for small items, giving uniform chunk size across the scene.
-- ppa outputs are NOT content-cropped: crop each output to its alpha bbox before saving as the -cut.webp (shell-base is the exception: keep full canvas, the game displays it at 1024).
-- Convert from raw PNG only; save results as lossless WebP (about 1KB per small sprite, whole set about 20KB).
-- CSS `image-rendering: pixelated` is NOT sufficient on phones (2026-11-15). Per spec it is nearest-neighbour only up to the nearest integer multiple, then smooth interpolation to the final size; WebKit additionally rasterizes transformed layers (our rotate/skew/scale sprites) through the compositor's linear filter. The art itself was fine — the fix is rendering: draw the scene into one `<canvas>` with `ctx.imageSmoothingEnabled = false` (a spec-guaranteed point-sample on every engine, the same backbuffer trick game engines use), backing store sized to whole device pixels.
+## 2026-11-15 PIPELINE VERDICT (supersedes ERRATA)
+- SHIPPED path (proven 0-px mismatch vs render at DPR 2/3/2.625):
+  nanobana -> withoutBG (Local API, cutouts cached) -> clean (alpha crop) -> NN /3|/5|/6 -> webp q89.
+- ppa is NOT in the shipped path: auto finds pw=1 (no pixelation + mesh warp); -w pins only
+  the WIDTH (x) — height (y) drifts up to 27% (flag -w10: 62x55 vs 63x71 correct).
+  If ppa is ever used: pin -w to the native block width AND fit output to the exact x,y
+  grid from the original aspect. Guard: check_aspect (tol 8%, fatal) in convert-lab/rows.py.
+- Renderer: per-sprite integer device-px chunks (index.html); JSON slots are source of truth.
+- Lab + TODO: project/word-rain-src/convert-lab/ (rows.py = review sheets).
