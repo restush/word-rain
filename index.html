@@ -884,7 +884,8 @@ function sceneVisible(name){
   return true;
 }
 const SPRITES = {};
-const SPRITE_V = "v7"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v8"; /* bump together with sw.js CACHE on any sprite change */
+const WALL_ZONE = ["old-wall","wall-paint","old-floor","floor-tiles","old-window","fix-window"]; /* exact-slot draw, tuner-equivalent */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -905,8 +906,9 @@ function buildScene(){
      number of device pixels. k = integer device px per art pixel, per sprite. */
   const base = SPRITES["shell-base"];
   if (base) {
-    const kb = Math.max(1, Math.round(size / base.naturalWidth));
-    ctx.drawImage(base, 0, 0, base.naturalWidth * kb, base.naturalHeight * kb);
+    /* Full 1024-frame sprite: map frame -> whole canvas exactly (tuner: width 1024).
+       NN point sample; shares the skins' px scale so seams cannot drift. */
+    ctx.drawImage(base, 0, 0, size, size);
   }
   const names = Object.keys(SCENE);
   const ordered = names.filter((n) => FLOOR_ITEMS.indexOf(n) < 0)
@@ -917,8 +919,12 @@ function buildScene(){
     const img = SPRITES[name];
     if (!img) return;
     const cw = img.naturalWidth, ch = img.naturalHeight;
-    const k = Math.max(1, Math.round(s.w * s.scx * px / cw)); /* whole device px per art px */
-    const w = cw * k, h = ch * k;
+    /* Wall zone (skins/floors/windows) draws at EXACT slot geometry like the tuner
+       (fractional w, aspect h); pixel objects keep the integer-k Unity rule. */
+    const wall = WALL_ZONE.indexOf(name) >= 0;
+    const k = wall ? 0 : Math.max(1, Math.round(s.w * s.scx * px / cw)); /* whole device px per art px */
+    const w = wall ? s.w * s.scx * px : cw * k;
+    const h = wall ? w * ch / cw : ch * k;
     const hBox = s.w * ch / cw;
     const cx = Math.round((s.x + s.w / 2) * px), cy = Math.round((s.y + hBox / 2) * px);
     (window.__drawn = window.__drawn || []).push([name, img.naturalWidth, img.naturalHeight, k, Math.round(cx - w / 2), Math.round(cy - h / 2), w, h]);
