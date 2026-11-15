@@ -1,4 +1,4 @@
-const CACHE = "word-rain-v6"; /* bump on any same-URL asset change; old buckets wiped on activate */
+const CACHE = "word-rain-v7"; /* bump on any same-URL asset change; old buckets wiped on activate */
 const ASSETS = [
   "./",
   "./index.html",
