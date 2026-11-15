@@ -884,7 +884,7 @@ function sceneVisible(name){
   return true;
 }
 const SPRITES = {};
-const SPRITE_V = "v10"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v11"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -973,9 +973,9 @@ function pixelIcon(name, label){
   im.onload = () => {
     const cx = cv.getContext("2d");
     cx.imageSmoothingEnabled = false; /* point sample: NN guaranteed by spec, unlike CSS */
-    const k = Math.max(1, Math.floor(Math.min(box / im.naturalWidth, box / im.naturalHeight)));
+    const k = Math.min(box / im.naturalWidth, box / im.naturalHeight); /* exact contain fit */
     const w = im.naturalWidth * k, h = im.naturalHeight * k;
-    cx.drawImage(im, Math.round((box - w) / 2), Math.round((box - h) / 2), w, h);
+    cx.drawImage(im, (box - w) / 2, (box - h) / 2, w, h);
   };
   im.src = "assets/" + name + "-cut.webp?" + SPRITE_V;
   return cv;
