@@ -76,19 +76,361 @@
 </div>
 <script>
 const ASSET = "../assets/";
-const INIT = [
-  ["old-wall",34,40,956,"before"],["old-floor",66,452,892,"before"],
-  ["wall-paint",35,40,954,"after"],["floor-tiles",66,453,892,"after"],
-  ["old-window",110,240,125,"before"],["blackboard",598,270,277,"before"],["old-fan",415,135,100,"before"],
-  ["clock",705,150,60,"before"],["map",255,255,140,"before"],["bookshelf",240,435,175,"before"],
-  ["desks",255,525,490,"both"],["teacher-desk",580,500,175,"both"],
-  ["rugs",785,545,130,"before"],["plant",85,605,105,"before"],
-  ["fix-window",110,240,125,"after"],["whiteboard",598,270,277,"after"],["ac",395,110,150,"after"],
-  ["poster-map",255,255,140,"after"],["bookshelf-new",240,435,175,"after"],["rugs-new",785,545,130,"after"],
-  ["plants-new",85,605,105,"after"],["curtains",105,225,135,"after"],
-  ["tv",620,130,240,"after"],["kaligrafi",595,145,100,"after"],["flag",880,150,85,"after"],
-  ["poster-english",115,500,115,"after"],["papan-karya",880,300,85,"after"]
-];
+/* Restu's latest input json — source of truth: tools/slots.json.
+   Reset / reload returns here. The paste box starts pre-filled with it. */
+const DEFAULT_INPUT = {
+ "old-wall": {
+  "group": "before",
+  "x": 34,
+  "y": 40,
+  "w": 956,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "old-floor": {
+  "group": "before",
+  "x": 66,
+  "y": 452,
+  "w": 892,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "wall-paint": {
+  "group": "after",
+  "x": 35,
+  "y": 40,
+  "w": 954,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "floor-tiles": {
+  "group": "after",
+  "x": 66,
+  "y": 453,
+  "w": 892,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "old-window": {
+  "group": "before",
+  "x": 108,
+  "y": 238,
+  "w": 125,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "blackboard": {
+  "group": "before",
+  "x": 602,
+  "y": 241,
+  "w": 277,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": true,
+  "visible": true
+ },
+ "old-fan": {
+  "group": "before",
+  "x": 400,
+  "y": 124,
+  "w": 100,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 0.48,
+  "scy": 0.48,
+  "flip": false,
+  "visible": true
+ },
+ "clock": {
+  "group": "before",
+  "x": 724,
+  "y": 222,
+  "w": 60,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": true,
+  "visible": true
+ },
+ "map": {
+  "group": "before",
+  "x": 254,
+  "y": 258,
+  "w": 140,
+  "rot": 3,
+  "skx": 2,
+  "sky": -27.5,
+  "scx": 0.9,
+  "scy": 1.12,
+  "flip": false,
+  "visible": true
+ },
+ "bookshelf": {
+  "group": "before",
+  "x": 261,
+  "y": 416,
+  "w": 175,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "desks": {
+  "group": "both",
+  "x": 250,
+  "y": 528,
+  "w": 490,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "teacher-desk": {
+  "group": "both",
+  "x": 431,
+  "y": 387,
+  "w": 175,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "rugs": {
+  "group": "before",
+  "x": 63,
+  "y": 548,
+  "w": 130,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "plant": {
+  "group": "before",
+  "x": 146,
+  "y": 502,
+  "w": 105,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "fix-window": {
+  "group": "after",
+  "x": 110,
+  "y": 240,
+  "w": 125,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "kaligrafi": {
+  "group": "after",
+  "x": 380,
+  "y": 136,
+  "w": 100,
+  "rot": -13.5,
+  "skx": -34.5,
+  "sky": 13,
+  "scx": 1.22,
+  "scy": 1.1,
+  "flip": false,
+  "visible": true
+ },
+ "whiteboard": {
+  "group": "after",
+  "x": 598,
+  "y": 270,
+  "w": 277,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "ac": {
+  "group": "after",
+  "x": 239,
+  "y": 181,
+  "w": 150,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "rugs-new": {
+  "group": "after",
+  "x": 232,
+  "y": 468,
+  "w": 130,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 0.5,
+  "scy": 0.5,
+  "flip": false,
+  "visible": true
+ },
+ "poster-map": {
+  "group": "after",
+  "x": 251,
+  "y": 310,
+  "w": 140,
+  "rot": 0,
+  "skx": 0,
+  "sky": -24,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "bookshelf-new": {
+  "group": "after",
+  "x": 113,
+  "y": 444,
+  "w": 175,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "plants-new": {
+  "group": "after",
+  "x": 50,
+  "y": 551,
+  "w": 105,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "curtains": {
+  "group": "after",
+  "x": 105,
+  "y": 225,
+  "w": 135,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": true,
+  "visible": true
+ },
+ "tv": {
+  "group": "after",
+  "x": 616,
+  "y": 122,
+  "w": 240,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 0.53,
+  "scy": 0.51,
+  "flip": false,
+  "visible": true
+ },
+ "flag": {
+  "group": "after",
+  "x": 506,
+  "y": 133,
+  "w": 85,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": false,
+  "visible": true
+ },
+ "poster-english": {
+  "group": "after",
+  "x": 382,
+  "y": 188,
+  "w": 115,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 0.6,
+  "scy": 0.6,
+  "flip": false,
+  "visible": true
+ },
+ "papan-karya": {
+  "group": "after",
+  "x": 407,
+  "y": 310,
+  "w": 85,
+  "rot": 0,
+  "skx": 0,
+  "sky": 0,
+  "scx": 1,
+  "scy": 1,
+  "flip": true,
+  "visible": true
+ }
+};
 function $(id){ return document.getElementById(id); }
 const stage = document.getElementById("stage");
 const layers = [];
@@ -206,13 +548,14 @@ function applyZoom(){
   $("stage-wrap").style.height = 1024 * z + "px";
 }
 function init(){
-  INIT.forEach((row) => {
-    const name = row[0];
+  Object.entries(DEFAULT_INPUT).forEach(([name, d]) => {
     const img = document.createElement("img");
     img.className = "layer";
     img.src = ASSET + name + "-cut.webp";
-    const st = {name: name, group: row[4], x: row[1], y: row[2], w: row[3], rot: 0, skx: 0, sky: 0,
-      scx: 1, scy: 1, flip: false, visible: true, el: img};
+    const st = {name: name, group: d.group, x: d.x, y: d.y, w: d.w,
+      rot: d.rot || 0, skx: d.skx || 0, sky: d.sky || 0,
+      scx: d.scx == null ? 1 : d.scx, scy: d.scy == null ? 1 : d.scy,
+      flip: !!d.flip, visible: d.visible !== false, el: img};
     img.addEventListener("pointerdown", (e) => startDrag(e, st));
     stage.appendChild(img);
     layers.push(st);
@@ -319,6 +662,7 @@ document.addEventListener("keydown", (e) => {
   place(sel); sync();
 });
 init();
+$("in").value = JSON.stringify(DEFAULT_INPUT, null, 1);  // latest input json — never lost again
 </script>
 </body>
 </html>
