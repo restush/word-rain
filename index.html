@@ -883,8 +883,9 @@ function sceneVisible(name){
   }
   return true;
 }
+const BAKED = {"old-window":[112.8,352.7,76.7,165.8],"blackboard":[616.8,257.2,250.8,279.2],"old-fan":[426.8,161.7,50.0,70.8],"clock":[731.8,234.5,44.2,52.5],"map":[256.1,220.8,131.7,198.3],"bookshelf":[158.6,509.9,159.2,169.2],"teacher-desk":[440.6,396.5,159.2,154.2],"rugs":[74.8,540.7,131.7,151.7],"plant":[87.6,602.8,75.8,105.0],"fix-window":[111.8,346.5,76.7,181.7],"kaligrafi":[105.3,287.5,67.5,60.0],"whiteboard":[609.7,302.0,223.3,260.0],"ac":[244.8,180.0,115.8,110.0],"poster-map":[311.8,319.7,71.7,129.2],"bookshelf-new":[268.7,441.0,129.2,164.2],"rugs-new":[230.8,553.1,54.2,69.2],"plants-new":[85.1,619.6,54.2,70.8],"curtains":[108.8,341.9,83.3,95.8],"tv":[682.9,255.2,101.7,123.3],"flag":[820.8,446.8,86.7,97.5],"poster-english":[240.6,368.9,59.2,97.5],"papan-karya":[119.8,509.8,75.8,98.3]}; /* baked AABBs, stage coords (bake_scene.py) */
 const SPRITES = {};
-const SPRITE_V = "v11"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v12"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -917,6 +918,13 @@ function buildScene(){
     if (!sceneVisible(name)) return;
     const img = SPRITES[name];
     if (!img) return;
+    const B = BAKED[name];
+    if (B) { /* baked scale/skew/rot/flip: plain blit at its AABB (tuner-identical) */
+      (window.__drawn = window.__drawn || []).push([name, img.naturalWidth, img.naturalHeight, 1,
+        Math.round(B[0] * px), Math.round(B[1] * px), B[2] * px, B[3] * px]);
+      ctx.drawImage(img, B[0] * px, B[1] * px, B[2] * px, B[3] * px);
+      return;
+    }
     const cw = img.naturalWidth, ch = img.naturalHeight;
     /* EXACT slot geometry for every sprite (tuner-equivalent): fractional w, scy-aware h,
        NN point sample keeps the pixel look; sizes match the tuned slots on every device. */
@@ -1014,6 +1022,8 @@ const WALL_SKIN = ["old-wall","wall-paint","old-floor","floor-tiles"];
 function layerRect(name){
   const s = SCENE[name], img = SPRITES[name];
   if (!s || !img) return null;
+  const B = BAKED[name];
+  if (B) return {x0: B[0], y0: B[1], x1: B[0] + B[2], y1: B[1] + B[3], a: B[2] * B[3]};
   const ar = img.naturalHeight / img.naturalWidth;
   const w = s.w * s.scx, h = s.w * ar * s.scy;
   const cx = s.x + s.w / 2, cy = s.y + s.w * ar / 2;
