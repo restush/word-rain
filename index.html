@@ -885,7 +885,7 @@ function sceneVisible(name){
 }
 const BAKED = {"old-window":[112.8,352.7,76.7,165.8],"blackboard":[616.8,257.2,250.8,279.2],"old-fan":[426.8,161.7,50.0,70.8],"clock":[731.8,234.5,44.2,52.5],"map":[256.1,220.8,131.7,198.3],"bookshelf":[158.6,509.9,159.2,169.2],"teacher-desk":[440.6,396.5,159.2,154.2],"rugs":[74.8,540.7,131.7,151.7],"plant":[87.6,602.8,75.8,105.0],"fix-window":[111.8,346.5,76.7,181.7],"kaligrafi":[105.3,287.5,67.5,60.0],"whiteboard":[609.7,302.0,223.3,260.0],"ac":[244.8,180.0,115.8,110.0],"poster-map":[311.8,319.7,71.7,129.2],"bookshelf-new":[268.7,441.0,129.2,164.2],"rugs-new":[230.8,553.1,54.2,69.2],"plants-new":[85.1,619.6,54.2,70.8],"curtains":[108.8,341.9,83.3,95.8],"tv":[682.9,255.2,101.7,123.3],"flag":[820.8,446.8,86.7,97.5],"poster-english":[240.6,368.9,59.2,97.5],"papan-karya":[119.8,509.8,75.8,98.3]}; /* baked AABBs, stage coords (bake_scene.py) */
 const SPRITES = {};
-const SPRITE_V = "v13"; /* bump together with sw.js CACHE on any sprite change */
+const SPRITE_V = "v14"; /* bump together with sw.js CACHE on any sprite change */
 function buildScene(){
   const stage = $("class-stage");
   const wrap = $("class-stage-wrap");
@@ -988,13 +988,40 @@ function pixelIcon(name, label){
   im.src = "assets/" + name + "-cut.webp?" + SPRITE_V;
   return cv;
 }
+function mysteryIcon(){
+  const cv = document.createElement("canvas");
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const box = Math.round(66 * dpr);
+  cv.width = box; cv.height = box;
+  cv.style.width = cv.style.height = "66px";
+  cv.setAttribute("role", "img");
+  cv.setAttribute("aria-label", "item terkunci");
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#1A535C";
+  cx.font = "bold " + Math.round(box * 0.62) + "px Georgia, serif";
+  cx.textAlign = "center"; cx.textBaseline = "middle";
+  cx.fillText("?", box / 2, box / 2 + box * 0.04);
+  return cv;
+}
 function renderShop(){
   const wrap = $("shop");
   wrap.innerHTML = "";
   SHOP.forEach((it) => {
-    if (!it.requires.every(owns)) return;
     const card = document.createElement("div");
     card.className = "shop-item";
+    if (!it.requires.every(owns)) { /* locked: mystery card */
+      card.classList.add("locked");
+      const nm = document.createElement("span");
+      nm.className = "nm";
+      nm.textContent = "???";
+      const btn = document.createElement("button");
+      btn.textContent = "???";
+      btn.disabled = true;
+      btn.className = "alt";
+      card.append(mysteryIcon(), nm, btn);
+      wrap.appendChild(card);
+      return;
+    }
     const img = pixelIcon(it.layer, it.name);
     const nm = document.createElement("span");
     nm.className = "nm";
