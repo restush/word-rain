@@ -65,7 +65,7 @@ def bake(name, s):
     out_w, out_h = math.ceil(max(xs) - ax) + 2, math.ceil(max(ys) - ay) + 2
     # PIL affine: in = Mi * (out + aabbmin - center) + center
     cx, cy = W / 2, H / 2
-    ox, oy = ax + 1 - cx, ay + 1 - cy  # +1: 1px pad
+    ox, oy = ax + 1, ay + 1  # +1: 1px pad; rel_s is center-relative (no c shift!)
     coeffs = (Mi[0], Mi[1], Mi[0] * ox + Mi[1] * oy + cx,
               Mi[2], Mi[3], Mi[2] * ox + Mi[3] * oy + cy)
     out = raster.transform((out_w, out_h), Image.AFFINE, coeffs, resample=Image.BICUBIC)
